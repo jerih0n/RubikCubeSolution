@@ -1,7 +1,6 @@
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Models;
 using RubikCubeSolution.Web.Models;
-using System;
 
 namespace RubikCubeSolution.Web.Services
 {
@@ -26,21 +25,27 @@ namespace RubikCubeSolution.Web.Services
                 case RubikCubeSideEnum.Front:
                     _rubikCube.RotateFront(request.Clockwise);
                     break;
+
                 case RubikCubeSideEnum.Right:
                     _rubikCube.RotateRight(request.Clockwise);
                     break;
+
                 case RubikCubeSideEnum.Upper:
                     _rubikCube.RotateUpper(request.Clockwise);
                     break;
+
                 case RubikCubeSideEnum.Bottom:
                     _rubikCube.RotateBottom(request.Clockwise);
                     break;
+
                 case RubikCubeSideEnum.Left:
                     _rubikCube.RotateLeft(request.Clockwise);
                     break;
+
                 case RubikCubeSideEnum.Down:
                     _rubikCube.RotateDown(request.Clockwise);
                     break;
+
                 default:
                     throw new ArgumentException($"Unknown rotation side: {request.Side}");
             }

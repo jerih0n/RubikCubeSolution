@@ -1,7 +1,6 @@
 using RubikCubeSolution.Logic.Constants;
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Models;
-using System.Collections.Generic;
 
 namespace RubikCubeSolution.Logic.Helpers
 {
@@ -110,7 +109,7 @@ namespace RubikCubeSolution.Logic.Helpers
         {
             var edges = new[] { topEdge, rightEdge, bottomEdge, leftEdge };
             var values = new MatrixCellFillEnum[4][];
-            
+
             for (int edgeIdx = 0; edgeIdx < 4; edgeIdx++)
             {
                 values[edgeIdx] = new MatrixCellFillEnum[3];
@@ -124,14 +123,14 @@ namespace RubikCubeSolution.Logic.Helpers
                 for (int sourceIndex = 0; sourceIndex < 3; sourceIndex++)
                 {
                     var mapping = EdgeRotationLookupTables.GetMapping(
-                        face, 
-                        clockwise, 
-                        (EdgeRotationLookupTables.EdgeIndex)sourceEdgeIdx, 
+                        face,
+                        clockwise,
+                        (EdgeRotationLookupTables.EdgeIndex)sourceEdgeIdx,
                         sourceIndex);
 
                     var targetEdge = edges[(int)mapping.TargetEdge];
                     var targetIndex = mapping.TargetIndex;
-                    
+
                     matrix[targetEdge[targetIndex].Row, targetEdge[targetIndex].Col] = values[sourceEdgeIdx][sourceIndex];
                 }
             }

@@ -1,4 +1,5 @@
 using RubikCubeSolution.Logic.Models;
+using RubikCubeSolution.Web.Services;
 
 namespace RubikCubeSolution.Web
 {
@@ -9,7 +10,7 @@ namespace RubikCubeSolution.Web
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
-            
+
             builder.Services.AddSingleton<RubikCube>();
             builder.Services.AddScoped<IRubikCubeProcessor, RubikCubeProcessor>();
 

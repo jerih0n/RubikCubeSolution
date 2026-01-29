@@ -1,5 +1,4 @@
 using RubikCubeSolution.Logic.Models;
-using System.Collections.Generic;
 
 namespace RubikCubeSolution.Logic.Configuration
 {

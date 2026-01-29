@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using RubikCubeSolution.Logic.Models;
 using RubikCubeSolution.Web.Models;
 using RubikCubeSolution.Web.Services;
 using System.Diagnostics;
