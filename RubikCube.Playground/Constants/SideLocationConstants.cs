@@ -6,7 +6,7 @@ namespace RubikCube.Playground.Constants
     {
         public static readonly RubikCubeSideLocationConfig LEFT_SIDE_CONFIG = new RubikCubeSideLocationConfig(3, 5, 0, 2);
 
-        public static readonly RubikCubeSideLocationConfig UPPER_SIDE_CONFIG = new RubikCubeSideLocationConfig(0, 3, 3, 5);
+        public static readonly RubikCubeSideLocationConfig UPPER_SIDE_CONFIG = new RubikCubeSideLocationConfig(0, 2, 3, 5);
 
         public static readonly RubikCubeSideLocationConfig FRONT_SIDE_CONFIG = new RubikCubeSideLocationConfig(3, 5, 3, 5);
 
