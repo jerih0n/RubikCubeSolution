@@ -1,5 +1,4 @@
-﻿using RubikCube.Playground.Constants;
-using RubikCube.Playground.Enums;
+﻿using RubikCubeSolution.Logic.Models;
 
 namespace RubikCube.Playground
 {
@@ -7,7 +6,7 @@ namespace RubikCube.Playground
     {
         private static void Main(string[] args)
         {
-            var cube = new RubikCube();
+            var cube = new RubicC();
 
             Console.WriteLine("Oringal matrix \n");
             Console.WriteLine(cube.PrintMatrix());

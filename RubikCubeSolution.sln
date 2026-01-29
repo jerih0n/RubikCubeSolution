@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubikCube.Playground", "RubikCube.Playground\RubikCube.Playground.csproj", "{DAB23073-8FB6-4D47-9115-69C74591CA1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubicCubeSolution.Web", "RubicCubeSolution.Web\RubicCubeSolution.Web.csproj", "{9202A8CB-39AA-4503-B9BF-A4DEF6C7E4E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubicCubeSolution.Logic", "RubicCubeSolution.Logic\RubicCubeSolution.Logic.csproj", "{EFF31983-318F-4D8B-AC43-F4874635D70E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9202A8CB-39AA-4503-B9BF-A4DEF6C7E4E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9202A8CB-39AA-4503-B9BF-A4DEF6C7E4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9202A8CB-39AA-4503-B9BF-A4DEF6C7E4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9202A8CB-39AA-4503-B9BF-A4DEF6C7E4E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFF31983-318F-4D8B-AC43-F4874635D70E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFF31983-318F-4D8B-AC43-F4874635D70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFF31983-318F-4D8B-AC43-F4874635D70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFF31983-318F-4D8B-AC43-F4874635D70E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
