@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Models;
 using RubikCubeSolution.Web.Models;
-using System;
 using System.Diagnostics;
 
 namespace RubikCubeSolution.Web.Controllers

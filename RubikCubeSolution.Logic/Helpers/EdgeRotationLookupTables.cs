@@ -1,34 +1,13 @@
-using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Configuration;
+using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Models;
 using System;
 using System.Collections.Generic;
 
 namespace RubikCubeSolution.Logic.Helpers
 {
-    /// <summary>
-    /// Pre-computed lookup tables for edge rotations
-    /// Each entry maps: (sourceEdgeIndex) -> (targetEdge, targetIndex)
-    /// </summary>
     public static class EdgeRotationLookupTables
     {
-        // Edge indices: 0=Top, 1=Right, 2=Bottom, 3=Left
-        public enum EdgeIndex { Top = 0, Right = 1, Bottom = 2, Left = 3 }
-
-        public struct EdgeMapping
-        {
-            public EdgeIndex TargetEdge;
-            public int TargetIndex;
-
-            public EdgeMapping(EdgeIndex targetEdge, int targetIndex)
-            {
-                TargetEdge = targetEdge;
-                TargetIndex = targetIndex;
-            }
-        }
-
-        // Lookup table: [face][clockwise][sourceEdge][sourceIndex] -> EdgeMapping
-        // Structure: EdgeMapping[4][3] where first index is edge (Top=0, Right=1, Bottom=2, Left=3), second is cell index (0,1,2)
         private static readonly Dictionary<RubikCubeSideEnum, Dictionary<bool, EdgeMapping[][]>> _lookupTables;
 
         static EdgeRotationLookupTables()
@@ -52,7 +31,7 @@ namespace RubikCubeSolution.Logic.Helpers
                          RubikCubeSideEnum.Front,
                          RubikCubeSideEnum.Right,
                          RubikCubeSideEnum.Upper,
-                         RubikCubeSideEnum.Bottom, // Back in this net
+                         RubikCubeSideEnum.Bottom,
                          RubikCubeSideEnum.Left,
                          RubikCubeSideEnum.Down
                      })

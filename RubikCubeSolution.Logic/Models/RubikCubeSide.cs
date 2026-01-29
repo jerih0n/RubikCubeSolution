@@ -17,9 +17,7 @@ namespace RubikCubeSolution.Logic.Models
 
         public RubikCubeSideLocationConfig SideConfig { get; }
         public RubikCubeSideEnum Type { get; }
-
         public MatrixCellFillEnum Color { get; }
-
         public List<Cell> Cells { get; }
 
         public MatrixCellFillEnum[,] RotateClockwise(MatrixCellFillEnum[,] matrixState)

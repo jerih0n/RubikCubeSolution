@@ -42,8 +42,7 @@ namespace RubikCubeSolution.Logic.Models
             return _matrix;
         }
 
-        public MatrixCellFillEnum[,] Matrix
-        { get { return _matrix; } }
+        public MatrixCellFillEnum[,] Matrix => _matrix;
 
         public string PrintMatrix()
         {
@@ -82,67 +81,41 @@ namespace RubikCubeSolution.Logic.Models
             return new RubikCubeSide(sideConfig, type, matrixCellFillEnum);
         }
 
-        /// <summary>
-        /// Rotate a face by side enum
-        /// </summary>
-        /// <param name="side">The side to rotate</param>
-        /// <param name="clockwise">True for clockwise (F, R, U, etc.), false for counter-clockwise (F', R', U', etc.)</param>
         public void Rotate(RubikCubeSideEnum side, bool clockwise)
         {
             _rotationService.Rotate(_matrix, side, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Front face (F) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateFront(bool clockwise = true)
         {
             _rotationService.RotateFront(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Right face (R) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateRight(bool clockwise = true)
         {
             _rotationService.RotateRight(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Upper face (U) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateUpper(bool clockwise = true)
         {
             _rotationService.RotateUpper(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Bottom/Back face (B) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateBottom(bool clockwise = true)
         {
             _rotationService.RotateBottom(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Left face (L) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateLeft(bool clockwise = true)
         {
             _rotationService.RotateLeft(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Rotate Down face (D) - clockwise if true, counter-clockwise if false
-        /// </summary>
         public void RotateDown(bool clockwise = true)
         {
             _rotationService.RotateDown(_matrix, clockwise);
         }
 
-        /// <summary>
-        /// Reset the cube to its original state
-        /// </summary>
         public void Reset()
         {
             _matrix = InitRubikCube();

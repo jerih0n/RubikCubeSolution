@@ -8,6 +8,6 @@ namespace RubikCubeSolution.Logic.Enums
         Green = 3,
         Yellow = 4,
         Red = 5,
-        Blue = 6,
+        Blue = 6
     }
 }

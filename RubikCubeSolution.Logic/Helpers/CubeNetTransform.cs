@@ -2,19 +2,13 @@ using RubikCubeSolution.Logic.Configuration;
 using RubikCubeSolution.Logic.Constants;
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Models;
+using System;
+using System.Collections.Generic;
 
 namespace RubikCubeSolution.Logic.Helpers
 {
-    /// <summary>
-    /// Maps the 2D cube net (matrix) to a 3D sticker model and provides exact 90° rotations.
-    /// Sticker identity is (CubiePosition P, FaceNormal N). This avoids corner-collisions.
-    /// </summary>
     internal static class CubeNetTransform
     {
-        internal readonly record struct Vec3i(int X, int Y, int Z);
-
-        internal readonly record struct StickerKey(Vec3i P, Vec3i N);
-
         private static readonly Dictionary<Cell, StickerKey> _cellToSticker;
         private static readonly Dictionary<StickerKey, Cell> _stickerToCell;
 
@@ -30,7 +24,7 @@ namespace RubikCubeSolution.Logic.Helpers
         internal static Vec3i GetFaceNormal(RubikCubeSideEnum face) => face switch
         {
             RubikCubeSideEnum.Front => new Vec3i(0, 0, 1),
-            RubikCubeSideEnum.Bottom => new Vec3i(0, 0, -1), // Back (Blue) in this net
+            RubikCubeSideEnum.Bottom => new Vec3i(0, 0, -1),
             RubikCubeSideEnum.Upper => new Vec3i(0, 1, 0),
             RubikCubeSideEnum.Down => new Vec3i(0, -1, 0),
             RubikCubeSideEnum.Right => new Vec3i(1, 0, 0),
@@ -46,18 +40,10 @@ namespace RubikCubeSolution.Logic.Helpers
             return sticker.P.Z == n.Z;
         }
 
-        /// <summary>
-        /// Rotates a sticker around the given face's outward normal.
-        /// Clockwise is as viewed from outside that face (standard cube notation).
-        /// </summary>
         internal static StickerKey RotateSticker(StickerKey sticker, RubikCubeSideEnum face, bool clockwise)
         {
             var nFace = GetFaceNormal(face);
-
-            // clockwise => -90° around face normal.
-            // If face normal is negative along the axis, rotation around +axis flips sign:
-            // Rot_{s*u}(theta) == Rot_u(s*theta).
-            var dir = clockwise ? -1 : 1; // -1 => -90°, +1 => +90°
+            var dir = clockwise ? -1 : 1;
 
             if (nFace.X != 0)
             {
@@ -83,7 +69,6 @@ namespace RubikCubeSolution.Logic.Helpers
 
         private static Vec3i RotateAroundX(Vec3i v, int dirAroundPosAxis)
         {
-            // dirAroundPosAxis: -1 => -90°, +1 => +90° around +X
             return dirAroundPosAxis switch
             {
                 -1 => new Vec3i(v.X, v.Z, -v.Y),
@@ -94,7 +79,6 @@ namespace RubikCubeSolution.Logic.Helpers
 
         private static Vec3i RotateAroundY(Vec3i v, int dirAroundPosAxis)
         {
-            // dirAroundPosAxis: -1 => -90°, +1 => +90° around +Y
             return dirAroundPosAxis switch
             {
                 -1 => new Vec3i(-v.Z, v.Y, v.X),
@@ -105,7 +89,6 @@ namespace RubikCubeSolution.Logic.Helpers
 
         private static Vec3i RotateAroundZ(Vec3i v, int dirAroundPosAxis)
         {
-            // dirAroundPosAxis: -1 => -90°, +1 => +90° around +Z
             return dirAroundPosAxis switch
             {
                 -1 => new Vec3i(v.Y, -v.X, v.Z),
@@ -148,18 +131,6 @@ namespace RubikCubeSolution.Logic.Helpers
 
         private static Vec3i GetCubiePosition(RubikCubeSideEnum face, int localRow, int localCol)
         {
-            // Coordinate system:
-            // - X: right (+) / left (-)
-            // - Y: up (+) / down (-)
-            // - Z: front (+) / back (-)
-            //
-            // The 2D net uses these face orientations:
-            // - Front: normal +Z
-            // - Back (enum Bottom): normal -Z, flipped horizontally in the net (col->x reversed)
-            // - Upper: normal +Y, bottom row touches Front top row
-            // - Down: normal -Y, top row touches Front bottom row
-            // - Right: normal +X, left col touches Front right col
-            // - Left: normal -X, right col touches Front left col
             return face switch
             {
                 RubikCubeSideEnum.Front => new Vec3i(
@@ -168,7 +139,7 @@ namespace RubikCubeSolution.Logic.Helpers
                     Z: 1),
 
                 RubikCubeSideEnum.Bottom => new Vec3i(
-                    X: 1 - localCol,     // flipped horizontally
+                    X: 1 - localCol,
                     Y: 1 - localRow,
                     Z: -1),
 
