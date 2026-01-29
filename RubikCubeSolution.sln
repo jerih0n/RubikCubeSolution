@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubikCube.Playground", "RubikCube.Playground\RubikCube.Playground.csproj", "{DAB23073-8FB6-4D47-9115-69C74591CA1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAB23073-8FB6-4D47-9115-69C74591CA1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DC4A14E1-2AEF-47D8-BD56-07A7AE4F0FE8}
+	EndGlobalSection
+EndGlobal
