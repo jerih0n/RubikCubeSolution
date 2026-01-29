@@ -146,9 +146,9 @@
     });
 
     function performRotation(instruction) {
-        // Disable buttons during rotation
-        const buttons = document.querySelectorAll('.rotation-btn');
-        buttons.forEach(btn => btn.disabled = true);
+        // Disable all buttons during rotation
+        const allButtons = document.querySelectorAll('.rotation-btn, .reset-btn');
+        allButtons.forEach(btn => btn.disabled = true);
 
         fetch('/Home/Rotate', {
             method: 'POST',
@@ -159,21 +159,26 @@
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.json().then(err => {
+                    throw new Error(err.error || 'Network response was not ok');
+                });
             }
             return response.json();
         })
         .then(data => {
-            updateMatrix(data.matrix);
+            if (data.matrix) {
+                updateMatrix(data.matrix);
+            } else {
+                throw new Error('Invalid response format');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Error performing rotation: ' + error.message);
         })
         .finally(() => {
-            // Re-enable buttons
-            const buttons = document.querySelectorAll('.rotation-btn');
-            buttons.forEach(btn => btn.disabled = false);
+            // Re-enable all buttons
+            allButtons.forEach(btn => btn.disabled = false);
         });
     }
 

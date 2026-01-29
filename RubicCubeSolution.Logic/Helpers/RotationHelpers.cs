@@ -72,6 +72,9 @@ namespace RubikCubeSolution.Logic.Helpers
         /// <summary>
         /// Rotates edges clockwise around a face
         /// Pattern: Top → Right → Bottom → Left → Top
+        /// When rotating edges, we need to account for orientation changes:
+        /// - Horizontal edges (Top/Bottom) rotate to vertical edges (Right/Left) and vice versa
+        /// - This requires reversing the order when transitioning between horizontal and vertical
         /// </summary>
         public static void RotateEdgesClockwise(
             MatrixCellFillEnum[,] matrix,
@@ -95,20 +98,28 @@ namespace RubikCubeSolution.Logic.Helpers
                 leftValues[i] = matrix[leftEdge[i].Row, leftEdge[i].Col];
             }
 
-            // Rotate: Top → Right → Bottom → Left → Top
-            // Try without any reversals first
+            // Rotate clockwise: Top → Right → Bottom → Left → Top
+            // When moving from horizontal (Top/Bottom) to vertical (Right/Left), reverse order
+            // When moving from vertical (Right/Left) to horizontal (Top/Bottom), reverse order
             for (int i = 0; i < 3; i++)
             {
-                matrix[rightEdge[i].Row, rightEdge[i].Col] = topValues[i];
-                matrix[bottomEdge[i].Row, bottomEdge[i].Col] = rightValues[i];
-                matrix[leftEdge[i].Row, leftEdge[i].Col] = bottomValues[i];
-                matrix[topEdge[i].Row, topEdge[i].Col] = leftValues[i];
+                // Top (horizontal) → Right (vertical): reverse order
+                matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = topValues[i];
+                // Right (vertical) → Bottom (horizontal): reverse order
+                matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = rightValues[i];
+                // Bottom (horizontal) → Left (vertical): reverse order
+                matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = bottomValues[i];
+                // Left (vertical) → Top (horizontal): reverse order
+                matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = leftValues[i];
             }
         }
 
         /// <summary>
         /// Rotates edges counter-clockwise around a face
         /// Pattern: Top → Left → Bottom → Right → Top
+        /// When rotating edges, we need to account for orientation changes:
+        /// - Horizontal edges (Top/Bottom) rotate to vertical edges (Right/Left) and vice versa
+        /// - This requires reversing the order when transitioning between horizontal and vertical
         /// </summary>
         public static void RotateEdgesCounterClockwise(
             MatrixCellFillEnum[,] matrix,
@@ -133,13 +144,18 @@ namespace RubikCubeSolution.Logic.Helpers
             }
 
             // Rotate counter-clockwise: Top → Left → Bottom → Right → Top
-            // Try without any reversals first
+            // When moving from horizontal (Top/Bottom) to vertical (Right/Left), reverse order
+            // When moving from vertical (Right/Left) to horizontal (Top/Bottom), reverse order
             for (int i = 0; i < 3; i++)
             {
-                matrix[leftEdge[i].Row, leftEdge[i].Col] = topValues[i];
-                matrix[bottomEdge[i].Row, bottomEdge[i].Col] = leftValues[i];
-                matrix[rightEdge[i].Row, rightEdge[i].Col] = bottomValues[i];
-                matrix[topEdge[i].Row, topEdge[i].Col] = rightValues[i];
+                // Top (horizontal) → Left (vertical): reverse order
+                matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = topValues[i];
+                // Left (vertical) → Bottom (horizontal): reverse order
+                matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = leftValues[i];
+                // Bottom (horizontal) → Right (vertical): reverse order
+                matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = bottomValues[i];
+                // Right (vertical) → Top (horizontal): reverse order
+                matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = rightValues[i];
             }
         }
     }

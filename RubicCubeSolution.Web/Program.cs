@@ -11,8 +11,8 @@ namespace RubikCubeSolution.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             
-            // Register RubikCube service
-            builder.Services.AddScoped<RubikCube>();
+            // Register RubikCube service as Singleton to persist state across requests
+            builder.Services.AddSingleton<RubikCube>();
 
             var app = builder.Build();
 
