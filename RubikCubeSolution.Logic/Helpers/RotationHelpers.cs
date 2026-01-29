@@ -125,7 +125,7 @@ namespace RubikCubeSolution.Logic.Helpers
                     var mapping = EdgeRotationLookupTables.GetMapping(
                         face,
                         clockwise,
-                        (EdgeRotationLookupTables.EdgeIndex)sourceEdgeIdx,
+                        (EdgeIndex)sourceEdgeIdx,
                         sourceIndex);
 
                     var targetEdge = edges[(int)mapping.TargetEdge];
