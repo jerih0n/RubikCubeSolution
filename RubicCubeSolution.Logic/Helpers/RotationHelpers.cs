@@ -114,11 +114,11 @@ namespace RubikCubeSolution.Logic.Helpers
             // Special case: Right and Left faces have all vertical edges
             // For these faces, we need to reverse the TARGET index instead
             bool allVertical = !topIsHorizontal && !rightIsHorizontal && !bottomIsHorizontal && !leftIsHorizontal;
-            bool allHorizontal = topIsHorizontal && rightIsHorizontal && bottomIsHorizontal && leftIsHorizontal;
 
             // Rotate clockwise: Top → Right → Bottom → Left → Top
             // When transitioning between horizontal and vertical, reverse the SOURCE index
             // Exception: For Right/Left faces (all vertical), reverse TARGET index instead
+            // For Upper/Down faces (all horizontal), normal logic handles it (no reversal since same orientation)
             for (int i = 0; i < 3; i++)
             {
                 if (allVertical)
@@ -132,6 +132,7 @@ namespace RubikCubeSolution.Logic.Helpers
                 else
                 {
                     // Normal case: reverse source if different orientation
+                    // For all-horizontal (Upper/Down) or all-vertical faces, orientations are same, so no reversal
                     int topSrcIdx = (topIsHorizontal != rightIsHorizontal) ? (2 - i) : i;
                     matrix[rightEdge[i].Row, rightEdge[i].Col] = topValues[topSrcIdx];
                     
@@ -184,10 +185,18 @@ namespace RubikCubeSolution.Logic.Helpers
             // For these faces, we need to reverse the TARGET index instead
             bool allVertical = !topIsHorizontal && !rightIsHorizontal && !bottomIsHorizontal && !leftIsHorizontal;
             bool allHorizontal = topIsHorizontal && rightIsHorizontal && bottomIsHorizontal && leftIsHorizontal;
+            
+            // Special case: Back face has horizontal-vertical-horizontal-vertical pattern
+            // Detect Back face by checking if TopEdge is at row 0 AND BottomEdge is at row 8
+            // Front face TopEdge is at row 2, BottomEdge is at row 6, so we can distinguish them
+            bool isBackFacePattern = topIsHorizontal && !rightIsHorizontal && bottomIsHorizontal && !leftIsHorizontal 
+                && topEdge.Count > 0 && topEdge[0].Row == 0 
+                && bottomEdge.Count > 0 && bottomEdge[0].Row == 8;
 
             // Rotate counter-clockwise: Top → Left → Bottom → Right → Top
             // When transitioning between horizontal and vertical, reverse the SOURCE index
             // Exception: For Right/Left faces (all vertical), reverse TARGET index instead
+            // Exception: For Back face with swapped edges, reverse TARGET index
             for (int i = 0; i < 3; i++)
             {
                 if (allVertical)
@@ -197,6 +206,20 @@ namespace RubikCubeSolution.Logic.Helpers
                     matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = leftValues[i];
                     matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = bottomValues[i];
                     matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = rightValues[i];
+                }
+                else if (isBackFacePattern)
+                {
+                    // Special case for Back face with swapped edges
+                    // When Left/Right are swapped, the rotation is: Top → Right → Bottom → Left → Top
+                    // But rightEdge parameter is actually LeftEdge, and leftEdge parameter is actually RightEdge
+                    // Top → Right: Top → leftEdge (which is actually RightEdge)
+                    matrix[leftEdge[i].Row, leftEdge[i].Col] = topValues[i];
+                    // Right → Bottom: rightEdge (which is actually LeftEdge) → Bottom
+                    matrix[bottomEdge[i].Row, bottomEdge[i].Col] = rightValues[i];
+                    // Bottom → Left: Bottom → rightEdge (which is actually LeftEdge)
+                    matrix[rightEdge[i].Row, rightEdge[i].Col] = bottomValues[i];
+                    // Left → Top: leftEdge (which is actually RightEdge) → Top
+                    matrix[topEdge[i].Row, topEdge[i].Col] = leftValues[i];
                 }
                 else
                 {
