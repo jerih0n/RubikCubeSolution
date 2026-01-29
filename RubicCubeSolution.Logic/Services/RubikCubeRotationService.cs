@@ -32,13 +32,8 @@ namespace RubikCubeSolution.Logic.Services
                     sideConfig.StartColumnIndex,
                     sideConfig.EndColumnIndex);
 
-                // Rotate the edges clockwise
-                RotationHelpers.RotateEdgesClockwise(
-                    matrix,
-                    edges.TopEdge,
-                    edges.RightEdge,
-                    edges.BottomEdge,
-                    edges.LeftEdge);
+                // Rotate the edges clockwise using explicit per-face functions
+                RotateEdgesClockwise(matrix, side, edges);
             }
             else
             {
@@ -50,14 +45,25 @@ namespace RubikCubeSolution.Logic.Services
                     sideConfig.StartColumnIndex,
                     sideConfig.EndColumnIndex);
 
-                // Rotate the edges counter-clockwise
-                RotationHelpers.RotateEdgesCounterClockwise(
-                    matrix,
-                    edges.TopEdge,
-                    edges.RightEdge,
-                    edges.BottomEdge,
-                    edges.LeftEdge);
+                // Rotate the edges counter-clockwise using explicit per-face functions
+                RotateEdgesCounterClockwise(matrix, side, edges);
             }
+        }
+
+        /// <summary>
+        /// Routes to the lookup table-based edge rotation function
+        /// </summary>
+        private void RotateEdgesClockwise(MatrixCellFillEnum[,] matrix, RubikCubeSideEnum side, FaceEdges edges)
+        {
+            RotationHelpers.RotateEdges(matrix, side, true, edges.TopEdge, edges.RightEdge, edges.BottomEdge, edges.LeftEdge);
+        }
+
+        /// <summary>
+        /// Routes to the lookup table-based edge rotation function
+        /// </summary>
+        private void RotateEdgesCounterClockwise(MatrixCellFillEnum[,] matrix, RubikCubeSideEnum side, FaceEdges edges)
+        {
+            RotationHelpers.RotateEdges(matrix, side, false, edges.TopEdge, edges.RightEdge, edges.BottomEdge, edges.LeftEdge);
         }
 
         /// <summary>
@@ -103,14 +109,8 @@ namespace RubikCubeSolution.Logic.Services
                     sideConfig.StartColumnIndex,
                     sideConfig.EndColumnIndex);
 
-                // For Back face clockwise, edges rotate: Top → Left → Bottom → Right → Top
-                // Use clockwise helper with swapped Left/Right to reverse the direction
-                RotationHelpers.RotateEdgesClockwise(
-                    matrix,
-                    edges.TopEdge,
-                    edges.LeftEdge,   // Swap: Left goes where Right normally would
-                    edges.BottomEdge,
-                    edges.RightEdge); // Swap: Right goes where Left normally would
+                // Rotate Back face edges clockwise using lookup table
+                RotationHelpers.RotateEdges(matrix, RubikCubeSideEnum.Bottom, true, edges.TopEdge, edges.RightEdge, edges.BottomEdge, edges.LeftEdge);
             }
             else
             {
@@ -122,13 +122,8 @@ namespace RubikCubeSolution.Logic.Services
                     sideConfig.StartColumnIndex,
                     sideConfig.EndColumnIndex);
 
-                // For Back face counter-clockwise, edges rotate: Top → Right → Bottom → Left → Top
-                RotationHelpers.RotateEdgesCounterClockwise(
-                    matrix,
-                    edges.TopEdge,
-                    edges.LeftEdge,   // Swap: Left goes where Right normally would
-                    edges.BottomEdge,
-                    edges.RightEdge); // Swap: Right goes where Left normally would
+                // Rotate Back face edges counter-clockwise using lookup table
+                RotationHelpers.RotateEdges(matrix, RubikCubeSideEnum.Bottom, false, edges.TopEdge, edges.RightEdge, edges.BottomEdge, edges.LeftEdge);
             }
         }
 
