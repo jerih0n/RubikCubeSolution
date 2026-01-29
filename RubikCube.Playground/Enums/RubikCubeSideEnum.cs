@@ -1,6 +1,6 @@
 ﻿namespace RubikCube.Playground.Enums
 {
-    internal enum RubikCubeSideEnum
+    public enum RubikCubeSideEnum
     {
         Left = 1,
         Upper = 2,
