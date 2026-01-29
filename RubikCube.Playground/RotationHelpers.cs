@@ -96,17 +96,13 @@ namespace RubikCube.Playground
             }
 
             // Rotate: Top → Right → Bottom → Left → Top
-            // Note: Some edges may need to be reversed depending on orientation
-            // For clockwise: Top goes to Right, Right goes to Bottom, Bottom goes to Left, Left goes to Top
-            // But we need to consider the orientation - edges might need to be reversed
-            
-            // Standard clockwise rotation (assuming edges are oriented correctly)
+            // Try without any reversals first
             for (int i = 0; i < 3; i++)
             {
                 matrix[rightEdge[i].Row, rightEdge[i].Col] = topValues[i];
                 matrix[bottomEdge[i].Row, bottomEdge[i].Col] = rightValues[i];
-                matrix[leftEdge[i].Row, leftEdge[i].Col] = bottomValues[2 - i]; // Reversed
-                matrix[topEdge[i].Row, topEdge[i].Col] = leftValues[2 - i]; // Reversed
+                matrix[leftEdge[i].Row, leftEdge[i].Col] = bottomValues[i];
+                matrix[topEdge[i].Row, topEdge[i].Col] = leftValues[i];
             }
         }
 
@@ -137,11 +133,12 @@ namespace RubikCube.Playground
             }
 
             // Rotate counter-clockwise: Top → Left → Bottom → Right → Top
+            // Try without any reversals first
             for (int i = 0; i < 3; i++)
             {
                 matrix[leftEdge[i].Row, leftEdge[i].Col] = topValues[i];
-                matrix[bottomEdge[i].Row, bottomEdge[i].Col] = leftValues[2 - i]; // Reversed
-                matrix[rightEdge[i].Row, rightEdge[i].Col] = bottomValues[2 - i]; // Reversed
+                matrix[bottomEdge[i].Row, bottomEdge[i].Col] = leftValues[i];
+                matrix[rightEdge[i].Row, rightEdge[i].Col] = bottomValues[i];
                 matrix[topEdge[i].Row, topEdge[i].Col] = rightValues[i];
             }
         }
