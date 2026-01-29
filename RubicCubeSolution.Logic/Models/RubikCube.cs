@@ -139,5 +139,13 @@ namespace RubikCubeSolution.Logic.Models
         {
             _rotationService.RotateDown(_matrix, clockwise);
         }
+
+        /// <summary>
+        /// Reset the cube to its original state
+        /// </summary>
+        public void Reset()
+        {
+            _matrix = InitRubikCube();
+        }
     }
 }

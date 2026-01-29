@@ -1,3 +1,5 @@
+using RubikCubeSolution.Logic.Models;
+
 namespace RubikCubeSolution.Web
 {
     public class Program
@@ -8,6 +10,9 @@ namespace RubikCubeSolution.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            
+            // Register RubikCube service
+            builder.Services.AddScoped<RubikCube>();
 
             var app = builder.Build();
 

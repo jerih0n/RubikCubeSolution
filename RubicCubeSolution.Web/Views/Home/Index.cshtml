@@ -1,8 +1,251 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using RubikCubeSolution.Logic.Enums
+@using RubikCubeSolution.Web.Helpers
+@model MatrixCellFillEnum[,]
+
+@{
+    ViewData["Title"] = "Rubik's Cube Matrix";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Rubik's Cube Matrix</h1>
+    
+    <!-- Rotation Controls -->
+    <div class="rotation-controls mb-4">
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <h5 class="text-center mb-3">Clockwise Rotations</h5>
+                <div class="btn-group-vertical" role="group">
+                    <button class="btn btn-primary rotation-btn" data-instruction="F">F (Front)</button>
+                    <button class="btn btn-primary rotation-btn" data-instruction="R">R (Right)</button>
+                    <button class="btn btn-primary rotation-btn" data-instruction="U">U (Up)</button>
+                    <button class="btn btn-primary rotation-btn" data-instruction="B">B (Back)</button>
+                    <button class="btn btn-primary rotation-btn" data-instruction="L">L (Left)</button>
+                    <button class="btn btn-primary rotation-btn" data-instruction="D">D (Down)</button>
+                </div>
+            </div>
+            <div class="col-auto">
+                <h5 class="text-center mb-3">Counter-Clockwise Rotations</h5>
+                <div class="btn-group-vertical" role="group">
+                    <button class="btn btn-danger rotation-btn" data-instruction="F'">F' (Front)</button>
+                    <button class="btn btn-danger rotation-btn" data-instruction="R'">R' (Right)</button>
+                    <button class="btn btn-danger rotation-btn" data-instruction="U'">U' (Up)</button>
+                    <button class="btn btn-danger rotation-btn" data-instruction="B'">B' (Back)</button>
+                    <button class="btn btn-danger rotation-btn" data-instruction="L'">L' (Left)</button>
+                    <button class="btn btn-danger rotation-btn" data-instruction="D'">D' (Down)</button>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-auto">
+                <button class="btn btn-warning btn-lg reset-btn" id="resetBtn">Reset Cube</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-center">
+        <div class="matrix-container" id="matrixContainer">
+            @for (int i = 0; i < Model.GetLength(0); i++)
+            {
+                <div class="matrix-row">
+                    @for (int j = 0; j < Model.GetLength(1); j++)
+                    {
+                        var cellValue = Model[i, j];
+                        @if (cellValue != MatrixCellFillEnum.None)
+                        {
+                            var hexColor = ColorMappingHelper.GetHexColor(cellValue);
+                            <div class="matrix-cell" style="background-color: @hexColor;" 
+                                 title="@cellValue.ToString() (@i, @j)"></div>
+                        }
+                        else
+                        {
+                            <div class="matrix-cell-empty"></div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+<style>
+    .matrix-container {
+        border: 2px solid #333;
+        padding: 5px;
+        background-color: #f0f0f0;
+        display: inline-block;
+    }
+    
+    .matrix-row {
+        display: flex;
+    }
+    
+    .matrix-cell {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #ccc;
+        margin: 1px;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+    
+    .matrix-cell:hover {
+        transform: scale(1.1);
+        z-index: 1;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .matrix-cell-empty {
+        width: 30px;
+        height: 30px;
+        margin: 1px;
+    }
+    
+    .rotation-controls {
+        margin-bottom: 2rem;
+    }
+    
+    .rotation-btn {
+        min-width: 120px;
+        margin: 2px;
+    }
+    
+    .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<script>
+    const colorMap = {
+        0: 'transparent',  // None
+        1: '#FF6B35',      // Orange
+        2: '#FFFFFF',      // White
+        3: '#00A651',      // Green
+        4: '#FFD700',      // Yellow
+        5: '#DC143C',      // Red
+        6: '#0066CC'       // Blue
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const rotationButtons = document.querySelectorAll('.rotation-btn');
+        
+        rotationButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const instruction = this.getAttribute('data-instruction');
+                performRotation(instruction);
+            });
+        });
+
+        const resetButton = document.getElementById('resetBtn');
+        if (resetButton) {
+            resetButton.addEventListener('click', function() {
+                resetCube();
+            });
+        }
+    });
+
+    function performRotation(instruction) {
+        // Disable buttons during rotation
+        const buttons = document.querySelectorAll('.rotation-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        fetch('/Home/Rotate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ instruction: instruction })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateMatrix(data.matrix);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error performing rotation: ' + error.message);
+        })
+        .finally(() => {
+            // Re-enable buttons
+            const buttons = document.querySelectorAll('.rotation-btn');
+            buttons.forEach(btn => btn.disabled = false);
+        });
+    }
+
+    function updateMatrix(matrix) {
+        const container = document.getElementById('matrixContainer');
+        container.innerHTML = '';
+
+        for (let i = 0; i < matrix.length; i++) {
+            const row = document.createElement('div');
+            row.className = 'matrix-row';
+
+            for (let j = 0; j < matrix[i].length; j++) {
+                const cellValue = matrix[i][j];
+                
+                if (cellValue !== 0) { // Not None
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.style.backgroundColor = colorMap[cellValue];
+                    cell.title = getColorName(cellValue) + ' (' + i + ', ' + j + ')';
+                    row.appendChild(cell);
+                } else {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'matrix-cell-empty';
+                    row.appendChild(emptyCell);
+                }
+            }
+
+            container.appendChild(row);
+        }
+    }
+
+    function getColorName(value) {
+        const names = {
+            0: 'None',
+            1: 'Orange',
+            2: 'White',
+            3: 'Green',
+            4: 'Yellow',
+            5: 'Red',
+            6: 'Blue'
+        };
+        return names[value] || 'Unknown';
+    }
+
+    function resetCube() {
+        // Disable buttons during reset
+        const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        fetch('/Home/Reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateMatrix(data.matrix);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error resetting cube: ' + error.message);
+        })
+        .finally(() => {
+            // Re-enable buttons
+            const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
+            buttons.forEach(btn => btn.disabled = false);
+        });
+    }
+</script>
