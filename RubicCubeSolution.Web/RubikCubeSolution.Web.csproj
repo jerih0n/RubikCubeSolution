@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RubicCubeSolution.Logic\RubicCubeSolution.Logic.csproj" />
+    <ProjectReference Include="..\RubikCubeSolution.Logic\RubikCubeSolution.Logic.csproj" />
   </ItemGroup>
 
 </Project>
