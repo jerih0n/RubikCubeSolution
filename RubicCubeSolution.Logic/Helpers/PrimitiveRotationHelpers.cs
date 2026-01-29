@@ -9,8 +9,6 @@ namespace RubikCubeSolution.Logic.Helpers
     /// </summary>
     public static class PrimitiveRotationHelpers
     {
-        #region Sticker Position Mapping
-
         /// <summary>
         /// Converts a sticker position index (1-54) to matrix coordinates (row, col).
         /// The sticker positions follow a standard Rubik's Cube face ordering:
@@ -18,16 +16,65 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         private static (int row, int col) GetMatrixCoordinates(int stickerPosition)
         {
-            return stickerPosition switch
+            // Upper face: rows 0-2, columns 3-5
+            if (stickerPosition >= 1 && stickerPosition <= 9)
             {
-                >= 1 and <= 9 => ((stickerPosition - 1) / 3, 3 + ((stickerPosition - 1) % 3)),      // Upper
-                >= 10 and <= 18 => (3 + ((stickerPosition - 10) / 3), 6 + ((stickerPosition - 10) % 3)), // Right
-                >= 19 and <= 27 => (3 + ((stickerPosition - 19) / 3), 3 + ((stickerPosition - 19) % 3)), // Front
-                >= 28 and <= 36 => (6 + ((stickerPosition - 28) / 3), 3 + ((stickerPosition - 28) % 3)), // Down
-                >= 37 and <= 45 => (3 + ((stickerPosition - 37) / 3), (stickerPosition - 37) % 3),      // Left
-                >= 46 and <= 54 => (3 + ((stickerPosition - 46) / 3), 9 + ((stickerPosition - 46) % 3)), // Back
-                _ => throw new ArgumentException($"Invalid sticker position: {stickerPosition}. Must be between 1 and 54.")
-            };
+                int position = stickerPosition - 1; // Convert to 0-indexed
+                int row = position / 3;
+                int col = 3 + (position % 3);
+                return (row, col);
+            }
+            // Right face: rows 3-5, columns 6-8
+            else if (stickerPosition >= 10 && stickerPosition <= 18)
+            {
+                int position = stickerPosition - 10;
+                int row = 3 + (position / 3);
+                int col = 6 + (position % 3);
+                return (row, col);
+            }
+            // Front face: rows 3-5, columns 3-5
+            else if (stickerPosition >= 19 && stickerPosition <= 27)
+            {
+                int position = stickerPosition - 19;
+                int row = 3 + (position / 3);
+                int col = 3 + (position % 3);
+                return (row, col);
+            }
+            // Down face: rows 6-8, columns 3-5
+            else if (stickerPosition >= 28 && stickerPosition <= 36)
+            {
+                int position = stickerPosition - 28;
+                int row = 6 + (position / 3);
+                int col = 3 + (position % 3);
+                return (row, col);
+            }
+            // Left face: rows 3-5, columns 0-2
+            else if (stickerPosition >= 37 && stickerPosition <= 45)
+            {
+                int position = stickerPosition - 37;
+                int row = 3 + (position / 3);
+                int col = position % 3;
+                return (row, col);
+            }
+            // Back face: rows 3-5, columns 9-11
+            else if (stickerPosition >= 46 && stickerPosition <= 54)
+            {
+                int position = stickerPosition - 46;
+                int row = 3 + (position / 3);
+                int col = 9 + (position % 3);
+                return (row, col);
+            }
+
+            throw new ArgumentException($"Invalid sticker position: {stickerPosition}. Must be between 1 and 54.");
+        }
+
+        private static void SwapStickers(MatrixCellFillEnum[,] matrix, int position1, int position2)
+        {
+            var (row1, col1) = GetMatrixCoordinates(position1);
+            var (row2, col2) = GetMatrixCoordinates(position2);
+            var temp = matrix[row1, col1];
+            matrix[row1, col1] = matrix[row2, col2];
+            matrix[row2, col2] = temp;
         }
 
         private static MatrixCellFillEnum GetStickerValue(MatrixCellFillEnum[,] matrix, int position)
@@ -42,118 +89,77 @@ namespace RubikCubeSolution.Logic.Helpers
             matrix[row, col] = value;
         }
 
-        #endregion
-
-        #region Cycle Rotation Helpers
-
-        /// <summary>
-        /// Rotates a cycle of sticker positions. Each position moves to the next position in the cycle.
-        /// The cycle array should contain positions in order: [pos1, pos2, pos3, pos4] where pos1→pos2→pos3→pos4→pos1
-        /// </summary>
-        private static void RotateCycle(MatrixCellFillEnum[,] matrix, int[] cycle)
-        {
-            if (cycle.Length < 2) return;
-
-            var firstValue = GetStickerValue(matrix, cycle[0]);
-            for (int i = 0; i < cycle.Length - 1; i++)
-            {
-                SetStickerValue(matrix, cycle[i], GetStickerValue(matrix, cycle[i + 1]));
-            }
-            SetStickerValue(matrix, cycle[cycle.Length - 1], firstValue);
-        }
-
-        /// <summary>
-        /// Rotates a cycle of sticker positions in reverse direction.
-        /// </summary>
-        private static void RotateCycleReverse(MatrixCellFillEnum[,] matrix, int[] cycle)
-        {
-            if (cycle.Length < 2) return;
-
-            var lastValue = GetStickerValue(matrix, cycle[cycle.Length - 1]);
-            for (int i = cycle.Length - 1; i > 0; i--)
-            {
-                SetStickerValue(matrix, cycle[i], GetStickerValue(matrix, cycle[i - 1]));
-            }
-            SetStickerValue(matrix, cycle[0], lastValue);
-        }
-
-        /// <summary>
-        /// Rotates a 3x3 face center clockwise using the standard corner and edge cycle pattern.
-        /// For a 3x3 face with positions:
-        ///   1 2 3
-        ///   4 5 6
-        ///   7 8 9
-        /// Corners are: top-left(1), top-right(3), bottom-right(9), bottom-left(7)
-        /// Edges are: top(2), right(6), bottom(8), left(4)
-        /// </summary>
-        private static void RotateFaceCenterClockwise(MatrixCellFillEnum[,] matrix, int basePosition)
-        {
-            // Calculate positions for a 3x3 face starting at basePosition
-            // Positions: basePosition, basePosition+1, basePosition+2, ..., basePosition+8
-            int topLeft = basePosition;
-            int top = basePosition + 1;
-            int topRight = basePosition + 2;
-            int left = basePosition + 3;
-            int center = basePosition + 4; // Not rotated
-            int right = basePosition + 5;
-            int bottomLeft = basePosition + 6;
-            int bottom = basePosition + 7;
-            int bottomRight = basePosition + 8;
-
-            // Rotate corners: topLeft → topRight → bottomRight → bottomLeft → topLeft
-            RotateCycle(matrix, new[] { topLeft, topRight, bottomRight, bottomLeft });
-            
-            // Rotate edges: top → right → bottom → left → top
-            RotateCycle(matrix, new[] { top, right, bottom, left });
-        }
-
-        /// <summary>
-        /// Rotates a 3x3 face center counter-clockwise.
-        /// </summary>
-        private static void RotateFaceCenterCounterClockwise(MatrixCellFillEnum[,] matrix, int basePosition)
-        {
-            int topLeft = basePosition;
-            int top = basePosition + 1;
-            int topRight = basePosition + 2;
-            int left = basePosition + 3;
-            int right = basePosition + 5;
-            int bottomLeft = basePosition + 6;
-            int bottom = basePosition + 7;
-            int bottomRight = basePosition + 8;
-
-            // Rotate corners in reverse: topLeft → bottomLeft → bottomRight → topRight → topLeft
-            RotateCycleReverse(matrix, new[] { topLeft, topRight, bottomRight, bottomLeft });
-            
-            // Rotate edges in reverse: top → left → bottom → right → top
-            RotateCycleReverse(matrix, new[] { top, right, bottom, left });
-        }
-
-        #endregion
-
-        #region Primitive Operations
-
         /// <summary>
         /// Primitive operation: Rotates the cube orientation around the vertical axis.
         /// This operation changes which face is considered "front" without rotating any face.
         /// </summary>
         private static void RotateCubeOrientation(MatrixCellFillEnum[,] matrix)
         {
-            // Rotate edge cycles around the cube (top, middle, bottom rows)
-            RotateCycle(matrix, new[] { 1, 45, 46, 19 });
-            RotateCycle(matrix, new[] { 2, 44, 47, 20 });
-            RotateCycle(matrix, new[] { 3, 43, 48, 21 });
-            RotateCycle(matrix, new[] { 4, 42, 49, 22 });
-            RotateCycle(matrix, new[] { 5, 41, 50, 23 });
-            RotateCycle(matrix, new[] { 6, 40, 51, 24 });
-            RotateCycle(matrix, new[] { 7, 39, 52, 25 });
-            RotateCycle(matrix, new[] { 8, 38, 53, 26 });
-            RotateCycle(matrix, new[] { 9, 37, 54, 27 });
+            // Rotate the top row of edges around the cube
+            SwapStickers(matrix, 1, 45);
+            SwapStickers(matrix, 4, 42);
+            SwapStickers(matrix, 7, 39);
+            SwapStickers(matrix, 45, 46);
+            SwapStickers(matrix, 42, 49);
+            SwapStickers(matrix, 39, 52);
+            SwapStickers(matrix, 46, 19);
+            SwapStickers(matrix, 49, 22);
+            SwapStickers(matrix, 52, 25);
+            SwapStickers(matrix, 19, 1);
+            SwapStickers(matrix, 22, 4);
+            SwapStickers(matrix, 25, 7);
 
-            // Rotate Right face center clockwise (base position 10: positions 10-18)
-            RotateFaceCenterClockwise(matrix, 10);
+            // Rotate the middle row of edges
+            SwapStickers(matrix, 2, 44);
+            SwapStickers(matrix, 5, 41);
+            SwapStickers(matrix, 8, 38);
+            SwapStickers(matrix, 44, 47);
+            SwapStickers(matrix, 41, 50);
+            SwapStickers(matrix, 38, 53);
+            SwapStickers(matrix, 47, 20);
+            SwapStickers(matrix, 50, 23);
+            SwapStickers(matrix, 53, 26);
+            SwapStickers(matrix, 20, 2);
+            SwapStickers(matrix, 23, 5);
+            SwapStickers(matrix, 26, 8);
 
-            // Rotate Back face center clockwise (base position 28: positions 28-36)
-            RotateFaceCenterClockwise(matrix, 28);
+            // Rotate the bottom row of edges
+            SwapStickers(matrix, 3, 43);
+            SwapStickers(matrix, 6, 40);
+            SwapStickers(matrix, 9, 37);
+            SwapStickers(matrix, 43, 48);
+            SwapStickers(matrix, 40, 51);
+            SwapStickers(matrix, 37, 54);
+            SwapStickers(matrix, 48, 21);
+            SwapStickers(matrix, 51, 24);
+            SwapStickers(matrix, 54, 27);
+            SwapStickers(matrix, 21, 3);
+            SwapStickers(matrix, 24, 6);
+            SwapStickers(matrix, 27, 9);
+
+            // Rotate the Right face center clockwise
+            var temp1 = GetStickerValue(matrix, 10);
+            var temp2 = GetStickerValue(matrix, 11);
+            SetStickerValue(matrix, 10, GetStickerValue(matrix, 16));
+            SetStickerValue(matrix, 11, GetStickerValue(matrix, 13));
+            SetStickerValue(matrix, 16, GetStickerValue(matrix, 18));
+            SetStickerValue(matrix, 13, GetStickerValue(matrix, 17));
+            SetStickerValue(matrix, 18, GetStickerValue(matrix, 12));
+            SetStickerValue(matrix, 17, GetStickerValue(matrix, 15));
+            SetStickerValue(matrix, 12, temp1);
+            SetStickerValue(matrix, 15, temp2);
+
+            // Rotate the Back face center clockwise
+            temp1 = GetStickerValue(matrix, 28);
+            temp2 = GetStickerValue(matrix, 29);
+            SetStickerValue(matrix, 28, GetStickerValue(matrix, 30));
+            SetStickerValue(matrix, 29, GetStickerValue(matrix, 33));
+            SetStickerValue(matrix, 30, GetStickerValue(matrix, 36));
+            SetStickerValue(matrix, 33, GetStickerValue(matrix, 35));
+            SetStickerValue(matrix, 36, GetStickerValue(matrix, 34));
+            SetStickerValue(matrix, 35, GetStickerValue(matrix, 31));
+            SetStickerValue(matrix, 34, temp1);
+            SetStickerValue(matrix, 31, temp2);
         }
 
         /// <summary>
@@ -163,12 +169,33 @@ namespace RubikCubeSolution.Logic.Helpers
         private static void RotateDownFaceClockwise(MatrixCellFillEnum[,] matrix)
         {
             // Rotate edges around the Down face
-            RotateCycle(matrix, new[] { 25, 16, 43, 34 });
-            RotateCycle(matrix, new[] { 26, 17, 44, 35 });
-            RotateCycle(matrix, new[] { 27, 18, 45, 36 });
+            var temp1 = GetStickerValue(matrix, 25);
+            var temp2 = GetStickerValue(matrix, 26);
+            var temp3 = GetStickerValue(matrix, 27);
+            SetStickerValue(matrix, 25, GetStickerValue(matrix, 16));
+            SetStickerValue(matrix, 26, GetStickerValue(matrix, 17));
+            SetStickerValue(matrix, 27, GetStickerValue(matrix, 18));
+            SetStickerValue(matrix, 16, GetStickerValue(matrix, 43));
+            SetStickerValue(matrix, 17, GetStickerValue(matrix, 44));
+            SetStickerValue(matrix, 18, GetStickerValue(matrix, 45));
+            SetStickerValue(matrix, 43, GetStickerValue(matrix, 34));
+            SetStickerValue(matrix, 44, GetStickerValue(matrix, 35));
+            SetStickerValue(matrix, 45, GetStickerValue(matrix, 36));
+            SetStickerValue(matrix, 34, temp1);
+            SetStickerValue(matrix, 35, temp2);
+            SetStickerValue(matrix, 36, temp3);
 
-            // Rotate the Down face center clockwise (base position 46: positions 46-54)
-            RotateFaceCenterClockwise(matrix, 46);
+            // Rotate the Down face center clockwise
+            temp1 = GetStickerValue(matrix, 46);
+            temp2 = GetStickerValue(matrix, 47);
+            SetStickerValue(matrix, 46, GetStickerValue(matrix, 52));
+            SetStickerValue(matrix, 47, GetStickerValue(matrix, 49));
+            SetStickerValue(matrix, 52, GetStickerValue(matrix, 54));
+            SetStickerValue(matrix, 49, GetStickerValue(matrix, 53));
+            SetStickerValue(matrix, 54, GetStickerValue(matrix, 48));
+            SetStickerValue(matrix, 53, GetStickerValue(matrix, 51));
+            SetStickerValue(matrix, 48, temp1);
+            SetStickerValue(matrix, 51, temp2);
         }
 
         /// <summary>
@@ -178,12 +205,33 @@ namespace RubikCubeSolution.Logic.Helpers
         private static void RotateDownFaceCounterClockwise(MatrixCellFillEnum[,] matrix)
         {
             // Rotate edges around the Down face (reverse direction)
-            RotateCycleReverse(matrix, new[] { 25, 16, 43, 34 });
-            RotateCycleReverse(matrix, new[] { 26, 17, 44, 35 });
-            RotateCycleReverse(matrix, new[] { 27, 18, 45, 36 });
+            var temp1 = GetStickerValue(matrix, 25);
+            var temp2 = GetStickerValue(matrix, 26);
+            var temp3 = GetStickerValue(matrix, 27);
+            SetStickerValue(matrix, 25, GetStickerValue(matrix, 34));
+            SetStickerValue(matrix, 26, GetStickerValue(matrix, 35));
+            SetStickerValue(matrix, 27, GetStickerValue(matrix, 36));
+            SetStickerValue(matrix, 34, GetStickerValue(matrix, 43));
+            SetStickerValue(matrix, 35, GetStickerValue(matrix, 44));
+            SetStickerValue(matrix, 36, GetStickerValue(matrix, 45));
+            SetStickerValue(matrix, 43, GetStickerValue(matrix, 16));
+            SetStickerValue(matrix, 44, GetStickerValue(matrix, 17));
+            SetStickerValue(matrix, 45, GetStickerValue(matrix, 18));
+            SetStickerValue(matrix, 16, temp1);
+            SetStickerValue(matrix, 17, temp2);
+            SetStickerValue(matrix, 18, temp3);
 
-            // Rotate the Down face center counter-clockwise (base position 46: positions 46-54)
-            RotateFaceCenterCounterClockwise(matrix, 46);
+            // Rotate the Down face center counter-clockwise
+            temp1 = GetStickerValue(matrix, 46);
+            temp2 = GetStickerValue(matrix, 47);
+            SetStickerValue(matrix, 46, GetStickerValue(matrix, 48));
+            SetStickerValue(matrix, 47, GetStickerValue(matrix, 51));
+            SetStickerValue(matrix, 48, GetStickerValue(matrix, 54));
+            SetStickerValue(matrix, 51, GetStickerValue(matrix, 53));
+            SetStickerValue(matrix, 54, GetStickerValue(matrix, 52));
+            SetStickerValue(matrix, 53, GetStickerValue(matrix, 49));
+            SetStickerValue(matrix, 52, temp1);
+            SetStickerValue(matrix, 49, temp2);
         }
 
         /// <summary>
@@ -192,53 +240,83 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         private static void RotateCubeForward(MatrixCellFillEnum[,] matrix)
         {
-            // Rotate edge columns (front, middle, back)
-            RotateCycle(matrix, new[] { 19, 28, 37, 10 });
-            RotateCycle(matrix, new[] { 20, 29, 38, 11 });
-            RotateCycle(matrix, new[] { 21, 30, 39, 12 });
-            RotateCycle(matrix, new[] { 22, 31, 40, 13 });
-            RotateCycle(matrix, new[] { 23, 32, 41, 14 });
-            RotateCycle(matrix, new[] { 24, 33, 42, 15 });
-            RotateCycle(matrix, new[] { 25, 34, 43, 16 });
-            RotateCycle(matrix, new[] { 26, 35, 44, 17 });
-            RotateCycle(matrix, new[] { 27, 36, 45, 18 });
+            // Rotate the front column of edges
+            var temp1 = GetStickerValue(matrix, 19);
+            var temp2 = GetStickerValue(matrix, 20);
+            var temp3 = GetStickerValue(matrix, 21);
+            SetStickerValue(matrix, 19, GetStickerValue(matrix, 28));
+            SetStickerValue(matrix, 20, GetStickerValue(matrix, 29));
+            SetStickerValue(matrix, 21, GetStickerValue(matrix, 30));
+            SetStickerValue(matrix, 28, GetStickerValue(matrix, 37));
+            SetStickerValue(matrix, 29, GetStickerValue(matrix, 38));
+            SetStickerValue(matrix, 30, GetStickerValue(matrix, 39));
+            SetStickerValue(matrix, 37, GetStickerValue(matrix, 10));
+            SetStickerValue(matrix, 38, GetStickerValue(matrix, 11));
+            SetStickerValue(matrix, 39, GetStickerValue(matrix, 12));
+            SetStickerValue(matrix, 10, temp1);
+            SetStickerValue(matrix, 11, temp2);
+            SetStickerValue(matrix, 12, temp3);
 
-            // Rotate Upper face center clockwise (base position 1: positions 1-9)
-            RotateFaceCenterClockwise(matrix, 1);
+            // Rotate the middle column of edges
+            temp1 = GetStickerValue(matrix, 22);
+            temp2 = GetStickerValue(matrix, 23);
+            temp3 = GetStickerValue(matrix, 24);
+            SetStickerValue(matrix, 22, GetStickerValue(matrix, 31));
+            SetStickerValue(matrix, 23, GetStickerValue(matrix, 32));
+            SetStickerValue(matrix, 24, GetStickerValue(matrix, 33));
+            SetStickerValue(matrix, 31, GetStickerValue(matrix, 40));
+            SetStickerValue(matrix, 32, GetStickerValue(matrix, 41));
+            SetStickerValue(matrix, 33, GetStickerValue(matrix, 42));
+            SetStickerValue(matrix, 40, GetStickerValue(matrix, 13));
+            SetStickerValue(matrix, 41, GetStickerValue(matrix, 14));
+            SetStickerValue(matrix, 42, GetStickerValue(matrix, 15));
+            SetStickerValue(matrix, 13, temp1);
+            SetStickerValue(matrix, 14, temp2);
+            SetStickerValue(matrix, 15, temp3);
 
-            // Rotate Back face center clockwise (base position 46: positions 46-54)
-            RotateFaceCenterClockwise(matrix, 46);
+            // Rotate the back column of edges
+            temp1 = GetStickerValue(matrix, 25);
+            temp2 = GetStickerValue(matrix, 26);
+            temp3 = GetStickerValue(matrix, 27);
+            SetStickerValue(matrix, 25, GetStickerValue(matrix, 34));
+            SetStickerValue(matrix, 26, GetStickerValue(matrix, 35));
+            SetStickerValue(matrix, 27, GetStickerValue(matrix, 36));
+            SetStickerValue(matrix, 34, GetStickerValue(matrix, 43));
+            SetStickerValue(matrix, 35, GetStickerValue(matrix, 44));
+            SetStickerValue(matrix, 36, GetStickerValue(matrix, 45));
+            SetStickerValue(matrix, 43, GetStickerValue(matrix, 16));
+            SetStickerValue(matrix, 44, GetStickerValue(matrix, 17));
+            SetStickerValue(matrix, 45, GetStickerValue(matrix, 18));
+            SetStickerValue(matrix, 16, temp1);
+            SetStickerValue(matrix, 17, temp2);
+            SetStickerValue(matrix, 18, temp3);
+
+            // Rotate the Upper face center clockwise
+            temp1 = GetStickerValue(matrix, 1);
+            temp2 = GetStickerValue(matrix, 2);
+            SetStickerValue(matrix, 1, GetStickerValue(matrix, 7));
+            SetStickerValue(matrix, 2, GetStickerValue(matrix, 4));
+            SetStickerValue(matrix, 7, GetStickerValue(matrix, 9));
+            SetStickerValue(matrix, 4, GetStickerValue(matrix, 8));
+            SetStickerValue(matrix, 9, GetStickerValue(matrix, 3));
+            SetStickerValue(matrix, 8, GetStickerValue(matrix, 6));
+            SetStickerValue(matrix, 3, temp1);
+            SetStickerValue(matrix, 6, temp2);
+
+            // Rotate the Back face center clockwise
+            temp1 = GetStickerValue(matrix, 46);
+            temp2 = GetStickerValue(matrix, 47);
+            SetStickerValue(matrix, 46, GetStickerValue(matrix, 48));
+            SetStickerValue(matrix, 47, GetStickerValue(matrix, 51));
+            SetStickerValue(matrix, 48, GetStickerValue(matrix, 54));
+            SetStickerValue(matrix, 51, GetStickerValue(matrix, 53));
+            SetStickerValue(matrix, 54, GetStickerValue(matrix, 52));
+            SetStickerValue(matrix, 53, GetStickerValue(matrix, 49));
+            SetStickerValue(matrix, 52, temp1);
+            SetStickerValue(matrix, 49, temp2);
         }
 
-        #endregion
-
-        #region Composition Helpers
-
-        /// <summary>
-        /// Executes a sequence of primitive operations.
-        /// </summary>
-        private static void ExecuteSequence(MatrixCellFillEnum[,] matrix, Action<MatrixCellFillEnum[,]>[] operations)
-        {
-            foreach (var operation in operations)
-            {
-                operation(matrix);
-            }
-        }
-
-        /// <summary>
-        /// Executes a primitive operation multiple times.
-        /// </summary>
-        private static void RepeatOperation(MatrixCellFillEnum[,] matrix, Action<MatrixCellFillEnum[,]> operation, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                operation(matrix);
-            }
-        }
-
-        #endregion
-
-        #region Public Face Rotation Methods
+        // Face rotation functions composed from primitive operations
 
         /// <summary>
         /// Rotates the Upper face clockwise.
@@ -246,9 +324,11 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateUpperClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeOrientation, 2);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateDownFaceClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 2);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
         }
 
         /// <summary>
@@ -257,9 +337,11 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateUpperCounterClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeOrientation, 2);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateDownFaceCounterClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 2);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
         }
 
         /// <summary>
@@ -270,7 +352,9 @@ namespace RubikCubeSolution.Logic.Helpers
         {
             RotateCubeOrientation(matrix);
             RotateDownFaceClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
         }
 
         /// <summary>
@@ -281,7 +365,9 @@ namespace RubikCubeSolution.Logic.Helpers
         {
             RotateCubeOrientation(matrix);
             RotateDownFaceCounterClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
         }
 
         /// <summary>
@@ -293,8 +379,12 @@ namespace RubikCubeSolution.Logic.Helpers
             RotateCubeForward(matrix);
             RotateCubeOrientation(matrix);
             RotateDownFaceClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
-            RepeatOperation(matrix, RotateCubeForward, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
         }
 
         /// <summary>
@@ -306,8 +396,12 @@ namespace RubikCubeSolution.Logic.Helpers
             RotateCubeForward(matrix);
             RotateCubeOrientation(matrix);
             RotateDownFaceCounterClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
-            RepeatOperation(matrix, RotateCubeForward, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
         }
 
         /// <summary>
@@ -316,10 +410,14 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateLeftClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeForward, 3);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
             RotateCubeOrientation(matrix);
             RotateDownFaceClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateCubeForward(matrix);
         }
 
@@ -329,10 +427,14 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateLeftCounterClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeForward, 3);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
+            RotateCubeForward(matrix);
             RotateCubeOrientation(matrix);
             RotateDownFaceCounterClockwise(matrix);
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateCubeForward(matrix);
         }
 
@@ -360,7 +462,9 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateBackClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateDownFaceClockwise(matrix);
             RotateCubeOrientation(matrix);
         }
@@ -371,11 +475,11 @@ namespace RubikCubeSolution.Logic.Helpers
         /// </summary>
         public static void RotateBackCounterClockwise(MatrixCellFillEnum[,] matrix)
         {
-            RepeatOperation(matrix, RotateCubeOrientation, 3);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
+            RotateCubeOrientation(matrix);
             RotateDownFaceCounterClockwise(matrix);
             RotateCubeOrientation(matrix);
         }
-
-        #endregion
     }
 }
