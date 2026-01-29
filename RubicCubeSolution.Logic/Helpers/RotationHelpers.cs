@@ -70,11 +70,18 @@ namespace RubikCubeSolution.Logic.Helpers
         }
 
         /// <summary>
+        /// Checks if an edge is horizontal (same row) or vertical (same column)
+        /// </summary>
+        private static bool IsHorizontalEdge(List<Cell> edge)
+        {
+            if (edge.Count < 2) return true;
+            return edge[0].Row == edge[1].Row;
+        }
+
+        /// <summary>
         /// Rotates edges clockwise around a face
         /// Pattern: Top → Right → Bottom → Left → Top
-        /// When rotating edges, we need to account for orientation changes:
-        /// - Horizontal edges (Top/Bottom) rotate to vertical edges (Right/Left) and vice versa
-        /// - This requires reversing the order when transitioning between horizontal and vertical
+        /// Reverse order when transitioning between horizontal and vertical edges
         /// </summary>
         public static void RotateEdgesClockwise(
             MatrixCellFillEnum[,] matrix,
@@ -98,28 +105,52 @@ namespace RubikCubeSolution.Logic.Helpers
                 leftValues[i] = matrix[leftEdge[i].Row, leftEdge[i].Col];
             }
 
+            // Determine orientations
+            bool topIsHorizontal = IsHorizontalEdge(topEdge);
+            bool rightIsHorizontal = IsHorizontalEdge(rightEdge);
+            bool bottomIsHorizontal = IsHorizontalEdge(bottomEdge);
+            bool leftIsHorizontal = IsHorizontalEdge(leftEdge);
+
+            // Special case: Right and Left faces have all vertical edges
+            // For these faces, we need to reverse the TARGET index instead
+            bool allVertical = !topIsHorizontal && !rightIsHorizontal && !bottomIsHorizontal && !leftIsHorizontal;
+            bool allHorizontal = topIsHorizontal && rightIsHorizontal && bottomIsHorizontal && leftIsHorizontal;
+
             // Rotate clockwise: Top → Right → Bottom → Left → Top
-            // When moving from horizontal (Top/Bottom) to vertical (Right/Left), reverse order
-            // When moving from vertical (Right/Left) to horizontal (Top/Bottom), reverse order
+            // When transitioning between horizontal and vertical, reverse the SOURCE index
+            // Exception: For Right/Left faces (all vertical), reverse TARGET index instead
             for (int i = 0; i < 3; i++)
             {
-                // Top (horizontal) → Right (vertical): reverse order
-                matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = topValues[i];
-                // Right (vertical) → Bottom (horizontal): reverse order
-                matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = rightValues[i];
-                // Bottom (horizontal) → Left (vertical): reverse order
-                matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = bottomValues[i];
-                // Left (vertical) → Top (horizontal): reverse order
-                matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = leftValues[i];
+                if (allVertical)
+                {
+                    // Special case for Right/Left faces: reverse target index
+                    matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = topValues[i];
+                    matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = rightValues[i];
+                    matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = bottomValues[i];
+                    matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = leftValues[i];
+                }
+                else
+                {
+                    // Normal case: reverse source if different orientation
+                    int topSrcIdx = (topIsHorizontal != rightIsHorizontal) ? (2 - i) : i;
+                    matrix[rightEdge[i].Row, rightEdge[i].Col] = topValues[topSrcIdx];
+                    
+                    int rightSrcIdx = (rightIsHorizontal != bottomIsHorizontal) ? (2 - i) : i;
+                    matrix[bottomEdge[i].Row, bottomEdge[i].Col] = rightValues[rightSrcIdx];
+                    
+                    int bottomSrcIdx = (bottomIsHorizontal != leftIsHorizontal) ? (2 - i) : i;
+                    matrix[leftEdge[i].Row, leftEdge[i].Col] = bottomValues[bottomSrcIdx];
+                    
+                    int leftSrcIdx = (leftIsHorizontal != topIsHorizontal) ? (2 - i) : i;
+                    matrix[topEdge[i].Row, topEdge[i].Col] = leftValues[leftSrcIdx];
+                }
             }
         }
 
         /// <summary>
         /// Rotates edges counter-clockwise around a face
         /// Pattern: Top → Left → Bottom → Right → Top
-        /// When rotating edges, we need to account for orientation changes:
-        /// - Horizontal edges (Top/Bottom) rotate to vertical edges (Right/Left) and vice versa
-        /// - This requires reversing the order when transitioning between horizontal and vertical
+        /// Reverse order when transitioning between horizontal and vertical edges
         /// </summary>
         public static void RotateEdgesCounterClockwise(
             MatrixCellFillEnum[,] matrix,
@@ -143,19 +174,45 @@ namespace RubikCubeSolution.Logic.Helpers
                 leftValues[i] = matrix[leftEdge[i].Row, leftEdge[i].Col];
             }
 
+            // Determine orientations
+            bool topIsHorizontal = IsHorizontalEdge(topEdge);
+            bool rightIsHorizontal = IsHorizontalEdge(rightEdge);
+            bool bottomIsHorizontal = IsHorizontalEdge(bottomEdge);
+            bool leftIsHorizontal = IsHorizontalEdge(leftEdge);
+
+            // Special case: Right and Left faces have all vertical edges
+            // For these faces, we need to reverse the TARGET index instead
+            bool allVertical = !topIsHorizontal && !rightIsHorizontal && !bottomIsHorizontal && !leftIsHorizontal;
+            bool allHorizontal = topIsHorizontal && rightIsHorizontal && bottomIsHorizontal && leftIsHorizontal;
+
             // Rotate counter-clockwise: Top → Left → Bottom → Right → Top
-            // When moving from horizontal (Top/Bottom) to vertical (Right/Left), reverse order
-            // When moving from vertical (Right/Left) to horizontal (Top/Bottom), reverse order
+            // When transitioning between horizontal and vertical, reverse the SOURCE index
+            // Exception: For Right/Left faces (all vertical), reverse TARGET index instead
             for (int i = 0; i < 3; i++)
             {
-                // Top (horizontal) → Left (vertical): reverse order
-                matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = topValues[i];
-                // Left (vertical) → Bottom (horizontal): reverse order
-                matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = leftValues[i];
-                // Bottom (horizontal) → Right (vertical): reverse order
-                matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = bottomValues[i];
-                // Right (vertical) → Top (horizontal): reverse order
-                matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = rightValues[i];
+                if (allVertical)
+                {
+                    // Special case for Right/Left faces: reverse target index
+                    matrix[leftEdge[2 - i].Row, leftEdge[2 - i].Col] = topValues[i];
+                    matrix[bottomEdge[2 - i].Row, bottomEdge[2 - i].Col] = leftValues[i];
+                    matrix[rightEdge[2 - i].Row, rightEdge[2 - i].Col] = bottomValues[i];
+                    matrix[topEdge[2 - i].Row, topEdge[2 - i].Col] = rightValues[i];
+                }
+                else
+                {
+                    // Normal case: reverse source if different orientation
+                    int topSrcIdx = (topIsHorizontal != leftIsHorizontal) ? (2 - i) : i;
+                    matrix[leftEdge[i].Row, leftEdge[i].Col] = topValues[topSrcIdx];
+                    
+                    int leftSrcIdx = (leftIsHorizontal != bottomIsHorizontal) ? (2 - i) : i;
+                    matrix[bottomEdge[i].Row, bottomEdge[i].Col] = leftValues[leftSrcIdx];
+                    
+                    int bottomSrcIdx = (bottomIsHorizontal != rightIsHorizontal) ? (2 - i) : i;
+                    matrix[rightEdge[i].Row, rightEdge[i].Col] = bottomValues[bottomSrcIdx];
+                    
+                    int rightSrcIdx = (rightIsHorizontal != topIsHorizontal) ? (2 - i) : i;
+                    matrix[topEdge[i].Row, topEdge[i].Col] = rightValues[rightSrcIdx];
+                }
             }
         }
     }
