@@ -2,7 +2,6 @@ using RubikCubeSolution.Logic.Configuration;
 using RubikCubeSolution.Logic.Constants;
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Helpers;
-using System;
 
 namespace RubikCubeSolution.Logic.Services
 {
@@ -87,10 +86,50 @@ namespace RubikCubeSolution.Logic.Services
 
         /// <summary>
         /// Rotate Bottom/Back face (B)
+        /// Note: Back face edges rotate in reverse order: Top → Left → Bottom → Right → Top (when clockwise)
         /// </summary>
         public void RotateBottom(MatrixCellFillEnum[,] matrix, bool clockwise)
         {
-            Rotate(matrix, RubikCubeSideEnum.Bottom, clockwise);
+            var sideConfig = GetSideConfig(RubikCubeSideEnum.Bottom);
+            var edges = _edgeMapping.GetEdgesForFace(RubikCubeSideEnum.Bottom);
+
+            if (clockwise)
+            {
+                // Rotate the face clockwise
+                RotationHelpers.RotateFaceClockwise(
+                    matrix,
+                    sideConfig.StartRowIndex,
+                    sideConfig.EndRowIndex,
+                    sideConfig.StartColumnIndex,
+                    sideConfig.EndColumnIndex);
+
+                // For Back face clockwise, edges rotate: Top → Left → Bottom → Right → Top
+                // Use clockwise helper with swapped Left/Right to reverse the direction
+                RotationHelpers.RotateEdgesClockwise(
+                    matrix,
+                    edges.TopEdge,
+                    edges.LeftEdge,   // Swap: Left goes where Right normally would
+                    edges.BottomEdge,
+                    edges.RightEdge); // Swap: Right goes where Left normally would
+            }
+            else
+            {
+                // Rotate the face counter-clockwise
+                RotationHelpers.RotateFaceCounterClockwise(
+                    matrix,
+                    sideConfig.StartRowIndex,
+                    sideConfig.EndRowIndex,
+                    sideConfig.StartColumnIndex,
+                    sideConfig.EndColumnIndex);
+
+                // For Back face counter-clockwise, edges rotate: Top → Right → Bottom → Left → Top
+                RotationHelpers.RotateEdgesCounterClockwise(
+                    matrix,
+                    edges.TopEdge,
+                    edges.LeftEdge,   // Swap: Left goes where Right normally would
+                    edges.BottomEdge,
+                    edges.RightEdge); // Swap: Right goes where Left normally would
+            }
         }
 
         /// <summary>

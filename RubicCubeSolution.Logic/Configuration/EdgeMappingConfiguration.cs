@@ -70,15 +70,15 @@ namespace RubikCubeSolution.Logic.Configuration
             };
 
             // Bottom/Back (B) - Blue face (rows 3-5, columns 9-11)
-            // In the 2D net: Back is to the right of Right, and connects to Upper's top and Down's bottom
+            // In the 2D net: Back is to the right of Right, and connects to Upper's top row and Down's bottom row
             mappings[RubikCubeSideEnum.Bottom] = new FaceEdges
             {
-                // Top edge: from Upper face right column (rows 0-2, column 5) - wraps to Back's top
-                TopEdge = new List<Cell> { new Cell(0, 5), new Cell(1, 5), new Cell(2, 5) },
+                // Top edge: from Upper face top row (row 0, columns 3-5) - connects to Back's top
+                TopEdge = new List<Cell> { new Cell(0, 3), new Cell(0, 4), new Cell(0, 5) },
                 // Right edge: from Right face right column (rows 3-5, column 8) - adjacent to Back's left
                 RightEdge = new List<Cell> { new Cell(3, 8), new Cell(4, 8), new Cell(5, 8) },
-                // Bottom edge: from Down face right column (rows 6-8, column 5) - wraps to Back's bottom
-                BottomEdge = new List<Cell> { new Cell(6, 5), new Cell(7, 5), new Cell(8, 5) },
+                // Bottom edge: from Down face bottom row (row 8, columns 3-5) - connects to Back's bottom
+                BottomEdge = new List<Cell> { new Cell(8, 3), new Cell(8, 4), new Cell(8, 5) },
                 // Left edge: from Left face left column (rows 3-5, column 0) - wraps around to Back's right
                 LeftEdge = new List<Cell> { new Cell(3, 0), new Cell(4, 0), new Cell(5, 0) }
             };
