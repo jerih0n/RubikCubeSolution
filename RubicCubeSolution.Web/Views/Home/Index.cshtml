@@ -52,12 +52,12 @@
         <div class="row justify-content-center mb-3">
             <div class="col-auto">
                 <div class="btn-group-horizontal" role="group">
-                    <button class="btn btn-secondary rotation-btn" data-instruction="F">F</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="R">R</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="U">U</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="B">B</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="L">L</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="D">D</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Front)" data-clockwise="true" data-label="F">F</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Right)" data-clockwise="true" data-label="R">R</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Upper)" data-clockwise="true" data-label="U">U</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Bottom)" data-clockwise="true" data-label="B">B</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Left)" data-clockwise="true" data-label="L">L</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Down)" data-clockwise="true" data-label="D">D</button>
                 </div>
             </div>
         </div>
@@ -66,12 +66,12 @@
         <div class="row justify-content-center mb-3">
             <div class="col-auto">
                 <div class="btn-group-horizontal" role="group">
-                    <button class="btn btn-secondary rotation-btn" data-instruction="F'">F'</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="R'">R'</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="U'">U'</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="B'">B'</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="L'">L'</button>
-                    <button class="btn btn-secondary rotation-btn" data-instruction="D'">D'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Front)" data-clockwise="false" data-label="F'">F'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Right)" data-clockwise="false" data-label="R'">R'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Upper)" data-clockwise="false" data-label="U'">U'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Bottom)" data-clockwise="false" data-label="B'">B'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Left)" data-clockwise="false" data-label="L'">L'</button>
+                    <button class="btn btn-secondary rotation-btn" data-side="@((int)RubikCubeSideEnum.Down)" data-clockwise="false" data-label="D'">D'</button>
                 </div>
             </div>
         </div>

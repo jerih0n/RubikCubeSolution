@@ -1,15 +1,13 @@
-// Color mapping for Rubik's Cube cells
 const colorMap = {
-    0: 'transparent',  // None
-    1: '#FF6B35',      // Orange
-    2: '#FFFFFF',      // White
-    3: '#00A651',      // Green
-    4: '#FFD700',      // Yellow
-    5: '#DC143C',      // Red
-    6: '#0066CC'       // Blue
+    0: 'transparent',
+    1: '#FF6B35',
+    2: '#FFFFFF',
+    3: '#00A651',
+    4: '#FFD700',
+    5: '#DC143C',
+    6: '#0066CC'
 };
 
-// Color name mapping
 const colorNames = {
     0: 'None',
     1: 'Orange',
@@ -20,10 +18,8 @@ const colorNames = {
     6: 'Blue'
 };
 
-// Button press history array
 let buttonPressHistory = [];
 
-// Initialize cube functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeRotationButtons();
     initializeResetButton();
@@ -38,16 +34,15 @@ function initializeRotationButtons() {
     
     rotationButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const instruction = this.getAttribute('data-instruction');
-            addToHistory(instruction);
-            performRotation(instruction);
+            const side = parseInt(this.getAttribute('data-side'));
+            const clockwise = this.getAttribute('data-clockwise') === 'true';
+            const label = this.getAttribute('data-label');
+            addToHistory(label);
+            performRotation(side, clockwise);
         });
     });
 }
 
-/**
- * Initialize reset button event listener
- */
 function initializeResetButton() {
     const resetButton = document.getElementById('resetBtn');
     if (resetButton) {
@@ -57,18 +52,11 @@ function initializeResetButton() {
     }
 }
 
-/**
- * Add instruction to history
- * @param {string} instruction - The rotation instruction (e.g., 'F', 'R', 'U', etc.)
- */
-function addToHistory(instruction) {
-    buttonPressHistory.push(instruction);
+function addToHistory(label) {
+    buttonPressHistory.push(label);
     updateHistoryDisplay();
 }
 
-/**
- * Update the history display element
- */
 function updateHistoryDisplay() {
     const historyList = document.getElementById('historyList');
     
@@ -90,12 +78,7 @@ function updateHistoryDisplay() {
     }
 }
 
-/**
- * Perform a rotation on the cube
- * @param {string} instruction - The rotation instruction
- */
-function performRotation(instruction) {
-    // Disable all buttons during rotation
+function performRotation(side, clockwise) {
     const allButtons = document.querySelectorAll('.rotation-btn, .reset-btn');
     allButtons.forEach(btn => btn.disabled = true);
 
@@ -104,7 +87,7 @@ function performRotation(instruction) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ instruction: instruction })
+        body: JSON.stringify({ side: side, clockwise: clockwise })
     })
     .then(response => {
         if (!response.ok) {
@@ -126,15 +109,10 @@ function performRotation(instruction) {
         alert('Error performing rotation: ' + error.message);
     })
     .finally(() => {
-        // Re-enable all buttons
         allButtons.forEach(btn => btn.disabled = false);
     });
 }
 
-/**
- * Update the matrix display with new data
- * @param {Array<Array<number>>} matrix - The matrix data from the server
- */
 function updateMatrix(matrix) {
     const container = document.getElementById('matrixContainer');
     if (!container) {
@@ -167,20 +145,11 @@ function updateMatrix(matrix) {
     }
 }
 
-/**
- * Get color name from enum value
- * @param {number} value - The color enum value
- * @returns {string} The color name
- */
 function getColorName(value) {
     return colorNames[value] || 'Unknown';
 }
 
-/**
- * Reset the cube to its initial state
- */
 function resetCube() {
-    // Disable buttons during reset
     const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
     buttons.forEach(btn => btn.disabled = true);
 
@@ -198,7 +167,6 @@ function resetCube() {
     })
     .then(data => {
         updateMatrix(data.matrix);
-        // Clear button press history
         buttonPressHistory = [];
         updateHistoryDisplay();
     })
@@ -207,7 +175,6 @@ function resetCube() {
         alert('Error resetting cube: ' + error.message);
     })
     .finally(() => {
-        // Re-enable buttons
         const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
         buttons.forEach(btn => btn.disabled = false);
     });

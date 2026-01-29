@@ -8,11 +8,10 @@ namespace RubikCubeSolution.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
             
-            // Register RubikCube service as Singleton to persist state across requests
             builder.Services.AddSingleton<RubikCube>();
+            builder.Services.AddScoped<IRubikCubeProcessor, RubikCubeProcessor>();
 
             var app = builder.Build();
 
