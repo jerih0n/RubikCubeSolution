@@ -28,17 +28,17 @@ namespace RubikCubeSolution.Web.Controllers
             try
             {
                 var matrix = _rubikCubeProcessor.Rotate(request);
-                return Json(new { matrix = matrix });
+                return Json(new MatrixResult { Matrix = matrix });
             }
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Invalid rotation request");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new ErrorResult { Error = ex.Message });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error performing rotation");
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new ErrorResult { Error = ex.Message });
             }
         }
 
@@ -48,18 +48,13 @@ namespace RubikCubeSolution.Web.Controllers
             try
             {
                 var matrix = _rubikCubeProcessor.Reset();
-                return Json(new { matrix = matrix });
+                return Json(new MatrixResult { Matrix = matrix });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resetting cube");
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new ErrorResult { Error = ex.Message });
             }
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

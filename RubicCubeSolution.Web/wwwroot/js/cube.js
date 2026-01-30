@@ -23,6 +23,7 @@ let buttonPressHistory = [];
 document.addEventListener('DOMContentLoaded', function() {
     initializeRotationButtons();
     initializeResetButton();
+    initializeTestSequenceButton();
     updateHistoryDisplay();
 });
 
@@ -33,12 +34,12 @@ function initializeRotationButtons() {
     const rotationButtons = document.querySelectorAll('.rotation-btn');
     
     rotationButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', async function() {
             const side = parseInt(this.getAttribute('data-side'));
             const clockwise = this.getAttribute('data-clockwise') === 'true';
             const label = this.getAttribute('data-label');
             addToHistory(label);
-            performRotation(side, clockwise);
+            await performRotation(side, clockwise);
         });
     });
 }
@@ -48,6 +49,15 @@ function initializeResetButton() {
     if (resetButton) {
         resetButton.addEventListener('click', function() {
             resetCube();
+        });
+    }
+}
+
+function initializeTestSequenceButton() {
+    const testSequenceButton = document.getElementById('testSequenceBtn');
+    if (testSequenceButton) {
+        testSequenceButton.addEventListener('click', function() {
+            runTestSequence();
         });
     }
 }
@@ -78,39 +88,48 @@ function updateHistoryDisplay() {
     }
 }
 
-function performRotation(side, clockwise) {
-    const allButtons = document.querySelectorAll('.rotation-btn, .reset-btn');
+/**
+ * Perform rotation and return a Promise
+ * @param {number} side - The side to rotate
+ * @param {boolean} clockwise - Whether to rotate clockwise
+ * @param {boolean} showAlert - Whether to show alert on error (default: true)
+ * @returns {Promise} Promise that resolves with the rotation data
+ */
+async function performRotation(side, clockwise, showAlert = true) {
+    const allButtons = document.querySelectorAll('.rotation-btn, .reset-btn, .test-sequence-btn');
     allButtons.forEach(btn => btn.disabled = true);
 
-    fetch('/Home/Rotate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ side: side, clockwise: clockwise })
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/Home/Rotate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ side: side, clockwise: clockwise })
+        });
+
         if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.error || 'Network response was not ok');
-            });
+            const err = await response.json();
+            throw new Error(err.error || 'Network response was not ok');
         }
-        return response.json();
-    })
-    .then(data => {
+
+        const data = await response.json();
+        
         if (data.matrix) {
             updateMatrix(data.matrix);
+            return data;
         } else {
             throw new Error('Invalid response format');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-        alert('Error performing rotation: ' + error.message);
-    })
-    .finally(() => {
+        if (showAlert) {
+            alert('Error performing rotation: ' + error.message);
+        }
+        throw error; // Re-throw so caller can handle it
+    } finally {
         allButtons.forEach(btn => btn.disabled = false);
-    });
+    }
 }
 
 function updateMatrix(matrix) {
@@ -150,7 +169,7 @@ function getColorName(value) {
 }
 
 function resetCube() {
-    const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
+    const buttons = document.querySelectorAll('.rotation-btn, .reset-btn, .test-sequence-btn');
     buttons.forEach(btn => btn.disabled = true);
 
     fetch('/Home/Reset', {
@@ -175,7 +194,43 @@ function resetCube() {
         alert('Error resetting cube: ' + error.message);
     })
     .finally(() => {
-        const buttons = document.querySelectorAll('.rotation-btn, .reset-btn');
+        const buttons = document.querySelectorAll('.rotation-btn, .reset-btn, .test-sequence-btn');
         buttons.forEach(btn => btn.disabled = false);
     });
+}
+
+/**
+ * Run test sequence: F (CW), R (CCW), U (CW), B (CCW), L (CW), D (CCW)
+ */
+async function runTestSequence() {
+    // Define the test sequence
+    // RubikCubeSideEnum: Front = 3, Right = 5, Upper = 2, Bottom = 6, Left = 1, Down = 4
+    const sequence = [
+        { side: 3, clockwise: true, label: 'F' },      // Front CW
+        { side: 5, clockwise: false, label: 'R\'' },  // Right CCW
+        { side: 2, clockwise: true, label: 'U' },      // Upper CW
+        { side: 6, clockwise: false, label: 'B\'' },   // Bottom CCW
+        { side: 1, clockwise: true, label: 'L' },      // Left CW
+        { side: 4, clockwise: false, label: 'D\'' }   // Down CCW
+    ];
+
+    try {
+        for (let i = 0; i < sequence.length; i++) {
+            const rotation = sequence[i];
+            
+            // Add to history
+            addToHistory(rotation.label);
+            
+            // Perform rotation (showAlert=false since we handle errors at sequence level)
+            await performRotation(rotation.side, rotation.clockwise, false);
+            
+            // Wait 1 second before next rotation (except for the last one)
+            if (i < sequence.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+    } catch (error) {
+        console.error('Error in test sequence:', error);
+        alert('Error during test sequence: ' + error.message);
+    }
 }
