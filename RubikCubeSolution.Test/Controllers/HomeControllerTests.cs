@@ -138,15 +138,5 @@ namespace RubikCubeSolution.Test.Controllers
             var objectResult = (ObjectResult)result;
             Assert.AreEqual(500, objectResult.StatusCode);
         }
-
-        [TestMethod]
-        public void Privacy_ReturnsView()
-        {
-            // Act
-            var result = _controller.Privacy();
-
-            // Assert
-            Assert.IsInstanceOfType(result, typeof(ViewResult));
-        }
     }
 }

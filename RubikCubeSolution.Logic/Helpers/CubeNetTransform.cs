@@ -19,79 +19,79 @@ namespace RubikCubeSolution.Logic.Helpers
 
         internal static Cell GetCell(StickerKey sticker) => _stickerToCell[sticker];
 
-        internal static Vec3i GetFaceNormal(RubikCubeSideEnum face) => face switch
+        internal static Vector GetFaceNormal(RubikCubeSideEnum face) => face switch
         {
-            RubikCubeSideEnum.Front => new Vec3i(0, 0, 1),
-            RubikCubeSideEnum.Bottom => new Vec3i(0, 0, -1),
-            RubikCubeSideEnum.Upper => new Vec3i(0, 1, 0),
-            RubikCubeSideEnum.Down => new Vec3i(0, -1, 0),
-            RubikCubeSideEnum.Right => new Vec3i(1, 0, 0),
-            RubikCubeSideEnum.Left => new Vec3i(-1, 0, 0),
+            RubikCubeSideEnum.Front => new Vector(0, 0, 1),
+            RubikCubeSideEnum.Bottom => new Vector(0, 0, -1),
+            RubikCubeSideEnum.Upper => new Vector(0, 1, 0),
+            RubikCubeSideEnum.Down => new Vector(0, -1, 0),
+            RubikCubeSideEnum.Right => new Vector(1, 0, 0),
+            RubikCubeSideEnum.Left => new Vector(-1, 0, 0),
             _ => throw new ArgumentOutOfRangeException(nameof(face), face, "Unknown face")
         };
 
         internal static bool IsInRotatedLayer(StickerKey sticker, RubikCubeSideEnum face)
         {
-            var n = GetFaceNormal(face);
-            if (n.X != 0) return sticker.P.X == n.X;
-            if (n.Y != 0) return sticker.P.Y == n.Y;
-            return sticker.P.Z == n.Z;
+            var faceNormal = GetFaceNormal(face);
+            if (faceNormal.X != 0) return sticker.Position.X == faceNormal.X;
+            if (faceNormal.Y != 0) return sticker.Position.Y == faceNormal.Y;
+            return sticker.Position.Z == faceNormal.Z;
         }
 
         internal static StickerKey RotateSticker(StickerKey sticker, RubikCubeSideEnum face, bool clockwise)
         {
-            var nFace = GetFaceNormal(face);
-            var dir = clockwise ? -1 : 1;
+            var faceNormal = GetFaceNormal(face);
+            var direction = clockwise ? -1 : 1;
 
-            if (nFace.X != 0)
+            if (faceNormal.X != 0)
             {
-                var dirAroundPosAxis = dir * nFace.X;
+                var directionAroundAxis = direction * faceNormal.X;
                 return new StickerKey(
-                    RotateAroundX(sticker.P, dirAroundPosAxis),
-                    RotateAroundX(sticker.N, dirAroundPosAxis));
+                    RotateAroundX(sticker.Position, directionAroundAxis),
+                    RotateAroundX(sticker.FaceNormal, directionAroundAxis));
             }
 
-            if (nFace.Y != 0)
+            if (faceNormal.Y != 0)
             {
-                var dirAroundPosAxis = dir * nFace.Y;
+                var directionAroundAxis = direction * faceNormal.Y;
                 return new StickerKey(
-                    RotateAroundY(sticker.P, dirAroundPosAxis),
-                    RotateAroundY(sticker.N, dirAroundPosAxis));
+                    RotateAroundY(sticker.Position, directionAroundAxis),
+                    RotateAroundY(sticker.FaceNormal, directionAroundAxis));
             }
 
-            var dirAroundPosZ = dir * nFace.Z;
+            var directionAroundZ = direction * faceNormal.Z;
             return new StickerKey(
-                RotateAroundZ(sticker.P, dirAroundPosZ),
-                RotateAroundZ(sticker.N, dirAroundPosZ));
+                RotateAroundZ(sticker.Position, directionAroundZ),
+                RotateAroundZ(sticker.FaceNormal, directionAroundZ));
         }
 
-        private static Vec3i RotateAroundX(Vec3i v, int dirAroundPosAxis)
+        private static Vector RotateAroundX(Vector vector, int directionAroundAxis)
         {
-            return dirAroundPosAxis switch
+            return directionAroundAxis switch
             {
-                -1 => new Vec3i(v.X, v.Z, -v.Y),
-                1 => new Vec3i(v.X, -v.Z, v.Y),
-                _ => throw new ArgumentOutOfRangeException(nameof(dirAroundPosAxis), dirAroundPosAxis, "Expected -1 or +1")
+                -1 => new Vector(vector.X, vector.Z, -vector.Y),
+                1 => new Vector(vector.X, -vector.Z, vector.Y),
+                _ => throw new ArgumentOutOfRangeException(nameof(directionAroundAxis), directionAroundAxis, "Expected -1 or +1")
             };
         }
 
-        private static Vec3i RotateAroundY(Vec3i v, int dirAroundPosAxis)
+        private static Vector RotateAroundY(Vector vector, int directionAroundAxis)
         {
-            return dirAroundPosAxis switch
+            return directionAroundAxis switch
             {
-                -1 => new Vec3i(-v.Z, v.Y, v.X),
-                1 => new Vec3i(v.Z, v.Y, -v.X),
-                _ => throw new ArgumentOutOfRangeException(nameof(dirAroundPosAxis), dirAroundPosAxis, "Expected -1 or +1")
+                -1 => new Vector(-vector.Z, vector.Y, vector.X),
+                1 => new Vector(vector.Z, vector.Y, -vector.X),
+                _ => throw new ArgumentOutOfRangeException(nameof(directionAroundAxis), directionAroundAxis, "Expected -1 or +1")
             };
         }
 
-        private static Vec3i RotateAroundZ(Vec3i v, int dirAroundPosAxis)
+        private static Vector RotateAroundZ(Vector vector, int directionAroundAxis)
         {
-            return dirAroundPosAxis switch
+            return directionAroundAxis switch
             {
-                -1 => new Vec3i(v.Y, -v.X, v.Z),
-                1 => new Vec3i(-v.Y, v.X, v.Z),
-                _ => throw new ArgumentOutOfRangeException(nameof(dirAroundPosAxis), dirAroundPosAxis, "Expected -1 or +1")
+                -1 => new Vector(vector.Y, -vector.X, vector.Z),
+                1 => new Vector(-vector.Y, vector.X, vector.Z),
+                _ => throw new ArgumentOutOfRangeException(nameof(directionAroundAxis), directionAroundAxis, "Expected -1 or +1")
             };
         }
 
@@ -102,14 +102,15 @@ namespace RubikCubeSolution.Logic.Helpers
 
             void AddFace(RubikCubeSideEnum face, RubikCubeSideLocationConfig cfg)
             {
-                var n = GetFaceNormal(face);
+                var faceNormal = GetFaceNormal(face);
 
-                for (int r = 0; r < 3; r++)
+                for (int row = 0; row < 3; row++)
                 {
-                    for (int c = 0; c < 3; c++)
+                    for (int column = 0; column < 3; column++)
                     {
-                        var cell = new Cell(cfg.StartRowIndex + r, cfg.StartColumnIndex + c);
-                        var sticker = new StickerKey(GetCubiePosition(face, r, c), n);
+                        var cell = new Cell(cfg.StartRowIndex + row, cfg.StartColumnIndex + column);
+                        var cubiePosition = GetCubiePosition(face, row, column);
+                        var sticker = new StickerKey(cubiePosition, faceNormal);
 
                         cellToSticker[cell] = sticker;
                         stickerToCell[sticker] = cell;
@@ -127,36 +128,36 @@ namespace RubikCubeSolution.Logic.Helpers
             return (cellToSticker, stickerToCell);
         }
 
-        private static Vec3i GetCubiePosition(RubikCubeSideEnum face, int localRow, int localCol)
+        private static Vector GetCubiePosition(RubikCubeSideEnum face, int localRow, int localCol)
         {
             return face switch
             {
-                RubikCubeSideEnum.Front => new Vec3i(
+                RubikCubeSideEnum.Front => new Vector(
                     X: -1 + localCol,
                     Y: 1 - localRow,
                     Z: 1),
 
-                RubikCubeSideEnum.Bottom => new Vec3i(
+                RubikCubeSideEnum.Bottom => new Vector(
                     X: 1 - localCol,
                     Y: 1 - localRow,
                     Z: -1),
 
-                RubikCubeSideEnum.Upper => new Vec3i(
+                RubikCubeSideEnum.Upper => new Vector(
                     X: -1 + localCol,
                     Y: 1,
                     Z: -1 + localRow),
 
-                RubikCubeSideEnum.Down => new Vec3i(
+                RubikCubeSideEnum.Down => new Vector(
                     X: -1 + localCol,
                     Y: -1,
                     Z: 1 - localRow),
 
-                RubikCubeSideEnum.Right => new Vec3i(
+                RubikCubeSideEnum.Right => new Vector(
                     X: 1,
                     Y: 1 - localRow,
                     Z: 1 - localCol),
 
-                RubikCubeSideEnum.Left => new Vec3i(
+                RubikCubeSideEnum.Left => new Vector(
                     X: -1,
                     Y: 1 - localRow,
                     Z: -1 + localCol),

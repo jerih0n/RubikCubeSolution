@@ -1,4 +1,4 @@
-namespace RubikCubeSolution.Logic.Helpers
+namespace RubikCubeSolution.Logic.Enums
 {
     public enum EdgeIndex
     {

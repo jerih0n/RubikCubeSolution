@@ -1,3 +1,5 @@
+using RubikCubeSolution.Logic.Enums;
+
 namespace RubikCubeSolution.Logic.Helpers
 {
     public readonly struct EdgeMapping
