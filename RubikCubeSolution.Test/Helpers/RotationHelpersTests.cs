@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RubikCubeSolution.Logic.Constants;
 using RubikCubeSolution.Logic.Enums;
 using RubikCubeSolution.Logic.Helpers;
 using RubikCubeSolution.Logic.Models;
@@ -21,7 +20,7 @@ namespace RubikCubeSolution.Test.Helpers
             RotationHelpers.RotateLayer(matrix, RubikCubeSideEnum.Front, true);
 
             // Assert
-            Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix), 
+            Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix),
                 "Matrix should change after rotation");
         }
 
@@ -37,7 +36,7 @@ namespace RubikCubeSolution.Test.Helpers
             RotationHelpers.RotateLayer(matrix, RubikCubeSideEnum.Front, false);
 
             // Assert
-            Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix), 
+            Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix),
                 "Matrix should change after rotation");
         }
 
@@ -54,7 +53,7 @@ namespace RubikCubeSolution.Test.Helpers
             RotationHelpers.RotateLayer(matrix, RubikCubeSideEnum.Front, false);
 
             // Assert
-            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix), 
+            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix),
                 "Rotating clockwise then counter-clockwise should return to original");
         }
 
@@ -73,7 +72,7 @@ namespace RubikCubeSolution.Test.Helpers
             RotationHelpers.RotateLayer(matrix, RubikCubeSideEnum.Front, true);
 
             // Assert
-            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix), 
+            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix),
                 "Rotating four times clockwise should return to original");
         }
 
@@ -101,7 +100,7 @@ namespace RubikCubeSolution.Test.Helpers
                 RotationHelpers.RotateLayer(matrix, side, true);
 
                 // Assert
-                Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix), 
+                Assert.IsFalse(AreMatricesEqual(originalMatrix, matrix),
                     $"Rotating {side} should change the matrix");
             }
         }
@@ -179,13 +178,13 @@ namespace RubikCubeSolution.Test.Helpers
             RotationHelpers.RotateFaceClockwise(matrix, 0, 2, 0, 2);
 
             // Assert
-            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix), 
+            Assert.IsTrue(AreMatricesEqual(originalMatrix, matrix),
                 "Rotating four times clockwise should return to original");
         }
 
         private bool AreMatricesEqual(MatrixCellFillEnum[,] matrix1, MatrixCellFillEnum[,] matrix2)
         {
-            if (matrix1.GetLength(0) != matrix2.GetLength(0) || 
+            if (matrix1.GetLength(0) != matrix2.GetLength(0) ||
                 matrix1.GetLength(1) != matrix2.GetLength(1))
                 return false;
 

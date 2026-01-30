@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RubikCubeSolution.Logic.Enums;
-using RubikCubeSolution.Logic.Models;
 using RubikCubeSolution.Web.Controllers;
 using RubikCubeSolution.Web.Models;
 using RubikCubeSolution.Web.Services;
