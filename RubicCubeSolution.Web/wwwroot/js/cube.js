@@ -27,9 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateHistoryDisplay();
 });
 
-/**
- * Initialize rotation button event listeners
- */
 function initializeRotationButtons() {
     const rotationButtons = document.querySelectorAll('.rotation-btn');
     
@@ -78,23 +75,14 @@ function updateHistoryDisplay() {
         historyList.innerHTML = '<p class="text-muted text-center">No rotations yet</p>';
     } else {
         let html = '';
-        // Show history in chronological order (oldest to newest)
         for (let i = 0; i < buttonPressHistory.length; i++) {
             html += `<div class="history-item">${buttonPressHistory[i]}</div>`;
         }
         historyList.innerHTML = html;
-        // Scroll to the end to show most recent items
         historyList.scrollLeft = historyList.scrollWidth;
     }
 }
 
-/**
- * Perform rotation and return a Promise
- * @param {number} side - The side to rotate
- * @param {boolean} clockwise - Whether to rotate clockwise
- * @param {boolean} showAlert - Whether to show alert on error (default: true)
- * @returns {Promise} Promise that resolves with the rotation data
- */
 async function performRotation(side, clockwise, showAlert = true) {
     const allButtons = document.querySelectorAll('.rotation-btn, .reset-btn, .test-sequence-btn');
     allButtons.forEach(btn => btn.disabled = true);
@@ -126,7 +114,7 @@ async function performRotation(side, clockwise, showAlert = true) {
         if (showAlert) {
             alert('Error performing rotation: ' + error.message);
         }
-        throw error; // Re-throw so caller can handle it
+        throw error;
     } finally {
         allButtons.forEach(btn => btn.disabled = false);
     }
@@ -147,7 +135,7 @@ function updateMatrix(matrix) {
         for (let j = 0; j < matrix[i].length; j++) {
             const cellValue = matrix[i][j];
             
-            if (cellValue !== 0) { // Not None
+            if (cellValue !== 0) {
                 const cell = document.createElement('div');
                 cell.className = 'matrix-cell';
                 cell.style.backgroundColor = colorMap[cellValue];
@@ -199,32 +187,24 @@ function resetCube() {
     });
 }
 
-/**
- * Run test sequence: F (CW), R (CCW), U (CW), B (CCW), L (CW), D (CCW)
- */
 async function runTestSequence() {
-    // Define the test sequence
-    // RubikCubeSideEnum: Front = 3, Right = 5, Upper = 2, Bottom = 6, Left = 1, Down = 4
     const sequence = [
-        { side: 3, clockwise: true, label: 'F' },      // Front CW
-        { side: 5, clockwise: false, label: 'R\'' },  // Right CCW
-        { side: 2, clockwise: true, label: 'U' },      // Upper CW
-        { side: 6, clockwise: false, label: 'B\'' },   // Bottom CCW
-        { side: 1, clockwise: true, label: 'L' },      // Left CW
-        { side: 4, clockwise: false, label: 'D\'' }   // Down CCW
+        { side: 3, clockwise: true, label: 'F' },
+        { side: 5, clockwise: false, label: 'R\'' },
+        { side: 2, clockwise: true, label: 'U' },
+        { side: 6, clockwise: false, label: 'B\'' },
+        { side: 1, clockwise: true, label: 'L' },
+        { side: 4, clockwise: false, label: 'D\'' }
     ];
 
     try {
         for (let i = 0; i < sequence.length; i++) {
             const rotation = sequence[i];
             
-            // Add to history
             addToHistory(rotation.label);
             
-            // Perform rotation (showAlert=false since we handle errors at sequence level)
             await performRotation(rotation.side, rotation.clockwise, false);
             
-            // Wait 1 second before next rotation (except for the last one)
             if (i < sequence.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
