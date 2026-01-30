@@ -8,7 +8,7 @@ A web application that simulates and visualizes a Rubik's Cube with interactive 
   - Download from: https://dotnet.microsoft.com/download/dotnet/8.0
   - Verify installation: `dotnet --version`
 
-- **IDE** (optional but recommended):
+- **IDE** (optional but NOT mandatory):
   - Visual Studio 2022 or later
   - Visual Studio Code with C# extension
   - JetBrains Rider
